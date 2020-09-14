@@ -15,6 +15,9 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using System;
+using System.Collections.Generic;
+
 namespace PixelsOfDoom.Map
 {
     public struct Thing
@@ -24,5 +27,16 @@ namespace PixelsOfDoom.Map
         public int Angle { get; }
         public int Type { get; }
         public ThingOptions Options { get; }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes((short)X));
+            bytes.AddRange(BitConverter.GetBytes((short)Y));
+            bytes.AddRange(BitConverter.GetBytes((short)Angle));
+            bytes.AddRange(BitConverter.GetBytes((short)Type));
+            bytes.AddRange(BitConverter.GetBytes((short)Options));
+            return bytes.ToArray();
+        }
     }
 }

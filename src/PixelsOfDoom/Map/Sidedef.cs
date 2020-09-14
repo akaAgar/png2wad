@@ -15,6 +15,10 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Wad;
+using System;
+using System.Collections.Generic;
+
 namespace PixelsOfDoom.Map
 {
     public struct Sidedef
@@ -25,5 +29,17 @@ namespace PixelsOfDoom.Map
 		public string LowerTexture { get; }
 		public string MiddleTexture { get; }
 		public int Sector { get; }
+
+		public byte[] ToBytes()
+		{
+			List<byte> bytes = new List<byte>();
+			bytes.AddRange(BitConverter.GetBytes((short)XOffset));
+			bytes.AddRange(BitConverter.GetBytes((short)YOffset));
+			bytes.AddRange(WadFile.GetStringBytes(UpperTexture));
+			bytes.AddRange(WadFile.GetStringBytes(LowerTexture));
+			bytes.AddRange(WadFile.GetStringBytes(MiddleTexture));
+			bytes.AddRange(BitConverter.GetBytes((short)Sector));
+			return bytes.ToArray();
+		}
 	}
 }

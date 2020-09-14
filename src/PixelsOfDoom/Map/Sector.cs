@@ -15,6 +15,10 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Wad;
+using System;
+using System.Collections.Generic;
+
 namespace PixelsOfDoom.Map
 {
     public struct Sector
@@ -26,5 +30,18 @@ namespace PixelsOfDoom.Map
         public int LightLevel { get; }
         public int Special { get; }
         public int Tag { get; }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes((short)FloorHeight));
+            bytes.AddRange(BitConverter.GetBytes((short)CeilingHeight));
+            bytes.AddRange(WadFile.GetStringBytes(FloorTexture));
+            bytes.AddRange(WadFile.GetStringBytes(CeilingTexture));
+            bytes.AddRange(BitConverter.GetBytes((short)LightLevel));
+            bytes.AddRange(BitConverter.GetBytes((short)Special));
+            bytes.AddRange(BitConverter.GetBytes((short)Tag));
+            return bytes.ToArray();
+        }
     }
 }

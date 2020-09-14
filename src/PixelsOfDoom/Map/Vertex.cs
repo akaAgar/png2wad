@@ -15,11 +15,28 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using System;
+using System.Collections.Generic;
+
 namespace PixelsOfDoom.Map
 {
     public struct Vertex
     {
         public int X { get; }
         public int Y { get; }
+
+        public Vertex(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes((short)X));
+            bytes.AddRange(BitConverter.GetBytes((short)Y));
+            return bytes.ToArray();
+        }
     }
 }

@@ -15,22 +15,36 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Wad;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PixelsOfDoom.Map
 {
     public sealed class DoomMap : IDisposable
     {
+        public string Name { get; }
+
         public List<Linedef> Linedefs { get; } = new List<Linedef>();
         public List<Sector> Sectors { get; } = new List<Sector>();
         public List<Sidedef> Sidedefs { get; } = new List<Sidedef>();
         public List<Thing> Things { get; } = new List<Thing>();
         public List<Vertex> Vertices { get; } = new List<Vertex>();
 
-        public DoomMap()
+        public DoomMap(string name)
         {
+            Name = name;
+        }
 
+        public void AddToWad(WadFile wad)
+        {
+            wad.AddLump(Name, new byte[0]);
+            wad.AddLump("LINEDEFS", Linedefs.SelectMany(x => x.ToBytes()).ToArray());
+            wad.AddLump("SECTORS", Sectors.SelectMany(x => x.ToBytes()).ToArray());
+            wad.AddLump("SIDEDEFS", Sidedefs.SelectMany(x => x.ToBytes()).ToArray());
+            wad.AddLump("THINGS", Things.SelectMany(x => x.ToBytes()).ToArray());
+            wad.AddLump("VERTEXES", Vertices.SelectMany(x => x.ToBytes()).ToArray());
         }
 
         public void Dispose()

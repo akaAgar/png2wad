@@ -15,6 +15,9 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using System;
+using System.Collections.Generic;
+
 namespace PixelsOfDoom.Map
 {
     public struct Linedef
@@ -26,5 +29,18 @@ namespace PixelsOfDoom.Map
         public int Tag { get; }
         public int SidedefRight { get; }
         public int SidedefLeft { get; }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes((short)Vertex1));
+            bytes.AddRange(BitConverter.GetBytes((short)Vertex2));
+            bytes.AddRange(BitConverter.GetBytes((short)Flags));
+            bytes.AddRange(BitConverter.GetBytes((short)Type));
+            bytes.AddRange(BitConverter.GetBytes((short)Tag));
+            bytes.AddRange(BitConverter.GetBytes((short)SidedefRight));
+            bytes.AddRange(BitConverter.GetBytes((short)SidedefLeft));
+            return bytes.ToArray();
+        }
     }
 }
