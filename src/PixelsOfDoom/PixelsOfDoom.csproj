@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\PixelSetting.cs" />
     <Compile Include="Map\DoomMap.cs" />
     <Compile Include="Map\ThingOptions.cs" />
     <Compile Include="Map\LinedefFlags.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="Map\Thing.cs" />
     <Compile Include="Map\Sidedef.cs" />
     <Compile Include="Map\Linedef.cs" />
+    <Compile Include="Config\GenerationConfig.cs" />
     <Compile Include="PixelsOfDoomProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
