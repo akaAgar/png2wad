@@ -16,37 +16,25 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 */
 
 using System;
-using System.Drawing;
-using PixelsOfDoom.Config;
-using PixelsOfDoom.Generator;
-using PixelsOfDoom.Map;
-using PixelsOfDoom.Wad;
+using System.Collections.Generic;
+using System.IO;
 
-namespace PixelsOfDoom
+namespace PixelsOfDoom.Config
 {
-    public sealed class PixelsOfDoomProgram : IDisposable
+    public sealed class GeneratorConfig : IDisposable
     {
-        private static void Main(string[] args)
+        public Dictionary<string, PixelSetting> Pixels { get; }
+
+        public GeneratorConfig()
         {
-            using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
+            Pixels = new Dictionary<string, PixelSetting>();
         }
 
-        public PixelsOfDoomProgram(string[] args)
+        public void Load(string filePath)
         {
-            WadFile wad = new WadFile();
+            Pixels.Clear();
 
-            using (MapGenerator generator = new MapGenerator())
-            {
-                using (Bitmap bitmap = (Bitmap)Image.FromFile("wolf3d_e1m1.png"))
-                {
-                    using (DoomMap map = generator.Generate("MAP01", new GeneratorConfig(), bitmap))
-                    {
-                        map.AddToWad(wad);
-                    }
-                }
-            }
-
-            wad.SaveToFile("test.wad");
+            if (!File.Exists(filePath)) return;
         }
 
         public void Dispose()

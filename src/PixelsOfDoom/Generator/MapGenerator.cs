@@ -15,26 +15,36 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Config;
+using PixelsOfDoom.Map;
 using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Drawing;
 
-namespace PixelsOfDoom.Config
+namespace PixelsOfDoom.Generator
 {
-    public sealed class GenerationConfig : IDisposable
+    public sealed class MapGenerator : IDisposable
     {
-        public Dictionary<string, PixelSetting> Pixels { get; }
-
-        public GenerationConfig()
+        public MapGenerator()
         {
-            Pixels = new Dictionary<string, PixelSetting>();
+
         }
 
-        public void Load(string filePath)
+        public DoomMap Generate(string name, GeneratorConfig config, Bitmap bitmap)
         {
-            Pixels.Clear();
+            DoomMap map = new DoomMap(name);
 
-            if (!File.Exists(filePath)) return;
+            int x, y;
+            Color c;
+            
+            for (x = 0; x < bitmap.Width; x++)
+                for (y = 0; y < bitmap.Height; y++)
+                {
+                    c = bitmap.GetPixel(x, y);
+                    if (c == Color.White) continue;
+                    map.Vertices.Add(new Vertex(x * 64, y * 64));
+                }
+
+            return map;
         }
 
         public void Dispose()
