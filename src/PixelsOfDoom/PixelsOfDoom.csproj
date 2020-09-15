@@ -44,6 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\PixelSetting.cs" />
+    <Compile Include="Map\ThingAngle.cs" />
+    <Compile Include="Toolbox.cs" />
     <Compile Include="Generator\MapGenerator.cs" />
     <Compile Include="Map\DoomMap.cs" />
     <Compile Include="Map\ThingOptions.cs" />
