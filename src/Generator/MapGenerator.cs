@@ -43,19 +43,22 @@ namespace PixelsOfDoom.Generator
         private int[,] Sectors;
         private bool[,] Things;
 
-        public MapGenerator()
+        private readonly GeneratorConfig Config;
+
+        public MapGenerator(GeneratorConfig config)
         {
             RNG = new Random();
+            Config = config;
         }
 
-        public DoomMap Generate(string name, GeneratorConfig config, Bitmap bitmap)
+        public DoomMap Generate(string name, Bitmap bitmap)
         {
             DoomMap map = new DoomMap(name);
             
             CreateArrays(bitmap);
             CreateSectors(bitmap, map);
             CreateLines(map);
-            CreateThings(map, bitmap, config, 0);
+            CreateThings(map, bitmap, 0);
 
             return map;
         }
@@ -191,7 +194,7 @@ namespace PixelsOfDoom.Generator
             return !((position.X < 0) || (position.Y < 0) || (position.X >= MapWidth) || (position.Y >= MapHeight));
         }
 
-        private void CreateThings(DoomMap map, Bitmap bitmap, GeneratorConfig config, int depth)
+        private void CreateThings(DoomMap map, Bitmap bitmap, int depth)
         {
             Point position = GetRandomFreeCell();
             Things[position.X, position.Y] = true;
