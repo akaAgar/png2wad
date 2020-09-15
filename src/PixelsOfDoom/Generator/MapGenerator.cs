@@ -67,7 +67,8 @@ namespace PixelsOfDoom.Generator
         {
             int x, y;
             int dX, dY;
-            Point v1, v2;
+            Point v1, v2; // vertices positions
+            int v1i, v2i; // indices of the vertices
 
             int sector, neighborSector;
 
@@ -87,19 +88,19 @@ namespace PixelsOfDoom.Generator
                             if (neighborSector == sector) continue; // Same sector, no need to add a line
 
                             GetVertices(x, y, dX, dY, out v1, out v2);
-                            map.Vertices.Add(new Vertex(v1));
-                            map.Vertices.Add(new Vertex(v2));
+                            v1i = map.AddVertex(v1);
+                            v2i = map.AddVertex(v2);
 
                             if (neighborSector < 0) // neighbor is a wall
                             {
                                 map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "STARTAN2", sector));
-                                map.Linedefs.Add(new Linedef(map.Vertices.Count - 2, map.Vertices.Count - 1, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
+                                map.Linedefs.Add(new Linedef(v1i, v2i, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
                             }
                             else
                             {
                                 map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", neighborSector));
                                 map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", sector));
-                                map.Linedefs.Add(new Linedef(map.Vertices.Count - 2, map.Vertices.Count - 1, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
+                                map.Linedefs.Add(new Linedef(v1i, v2i, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
                             }
                         }
                 }

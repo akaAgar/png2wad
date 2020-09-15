@@ -18,6 +18,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 using PixelsOfDoom.Wad;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace PixelsOfDoom.Map
@@ -30,7 +31,7 @@ namespace PixelsOfDoom.Map
         public List<Sector> Sectors { get; } = new List<Sector>();
         public List<Sidedef> Sidedefs { get; } = new List<Sidedef>();
         public List<Thing> Things { get; } = new List<Thing>();
-        public List<Vertex> Vertices { get; } = new List<Vertex>();
+        private List<Vertex> Vertices { get; } = new List<Vertex>();
 
         public DoomMap(string name)
         {
@@ -45,6 +46,16 @@ namespace PixelsOfDoom.Map
             wad.AddLump("SIDEDEFS", Sidedefs.SelectMany(x => x.ToBytes()).ToArray());
             wad.AddLump("THINGS", Things.SelectMany(x => x.ToBytes()).ToArray());
             wad.AddLump("VERTEXES", Vertices.SelectMany(x => x.ToBytes()).ToArray());
+        }
+
+        public int AddVertex(Point pt)
+        {
+            for (int i = 0; i < Vertices.Count; i++)
+                if ((Vertices[i].X == pt.X) && (Vertices[i].Y == pt.Y))
+                    return i;
+
+            Vertices.Add(new Vertex(pt));
+            return Vertices.Count - 1;
         }
 
         public void Dispose()
