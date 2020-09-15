@@ -31,6 +31,17 @@ namespace PixelsOfDoom.Map
         public int Special { get; }
         public int Tag { get; }
 
+        public Sector(int floorHeight, int ceilingHeight, string floorTexture, string ceilingTexture, int lightLevel, int special, int tag)
+        {
+            FloorHeight = floorHeight;
+            CeilingHeight = ceilingHeight;
+            FloorTexture = floorTexture;
+            CeilingTexture = ceilingTexture;
+            LightLevel = lightLevel;
+            Special = special;
+            Tag = tag;
+        }
+
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

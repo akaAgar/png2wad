@@ -30,6 +30,16 @@ namespace PixelsOfDoom.Map
 		public string MiddleTexture { get; }
 		public int Sector { get; }
 
+        public Sidedef(int xOffset, int yOffset, string upperTexture, string lowerTexture, string middleTexture, int sector)
+        {
+            XOffset = xOffset;
+            YOffset = yOffset;
+            UpperTexture = upperTexture;
+            LowerTexture = lowerTexture;
+            MiddleTexture = middleTexture;
+            Sector = sector;
+        }
+
 		public byte[] ToBytes()
 		{
 			List<byte> bytes = new List<byte>();

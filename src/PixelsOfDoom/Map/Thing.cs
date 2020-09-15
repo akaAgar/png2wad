@@ -28,6 +28,15 @@ namespace PixelsOfDoom.Map
         public int Type { get; }
         public ThingOptions Options { get; }
 
+        public Thing(int x, int y, int angle, int type, ThingOptions options)
+        {
+            X = x;
+            Y = y;
+            Angle = angle;
+            Type = type;
+            Options = options;
+        }
+
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

@@ -30,6 +30,17 @@ namespace PixelsOfDoom.Map
         public int SidedefRight { get; }
         public int SidedefLeft { get; }
 
+        public Linedef(int vertex1, int vertex2, LinedefFlags flags, int type, int tag, int sidedefLeft, int sidedefRight)
+        {
+            Vertex1 = vertex1;
+            Vertex2 = vertex2;
+            Flags = flags;
+            Type = type;
+            Tag = tag;
+            SidedefRight = sidedefRight;
+            SidedefLeft = sidedefLeft;
+        }
+
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();
