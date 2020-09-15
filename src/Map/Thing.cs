@@ -1,7 +1,7 @@
 ﻿/*
 ==========================================================================
 This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/one-bit-of-engine)
+by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
 Pixels of Doom is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -20,37 +20,31 @@ using System.Collections.Generic;
 
 namespace PixelsOfDoom.Map
 {
-    public struct Linedef
+    public struct Thing
     {
-        public int Vertex1 { get; }
-        public int Vertex2 { get; }
-        public LinedefFlags Flags { get; }
+        public int X { get; }
+        public int Y { get; }
+        public int Angle { get; }
         public int Type { get; }
-        public int Tag { get; }
-        public int SidedefRight { get; }
-        public int SidedefLeft { get; }
+        public ThingOptions Options { get; }
 
-        public Linedef(int vertex1, int vertex2, LinedefFlags flags, int type, int tag, int sidedefLeft, int sidedefRight)
+        public Thing(int x, int y, int angle, int type, ThingOptions options)
         {
-            Vertex1 = vertex1;
-            Vertex2 = vertex2;
-            Flags = flags;
+            X = x;
+            Y = y;
+            Angle = angle;
             Type = type;
-            Tag = tag;
-            SidedefRight = sidedefRight;
-            SidedefLeft = sidedefLeft;
+            Options = options;
         }
 
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();
-            bytes.AddRange(BitConverter.GetBytes((short)Vertex1));
-            bytes.AddRange(BitConverter.GetBytes((short)Vertex2));
-            bytes.AddRange(BitConverter.GetBytes((short)Flags));
+            bytes.AddRange(BitConverter.GetBytes((short)X));
+            bytes.AddRange(BitConverter.GetBytes((short)Y));
+            bytes.AddRange(BitConverter.GetBytes((short)Angle));
             bytes.AddRange(BitConverter.GetBytes((short)Type));
-            bytes.AddRange(BitConverter.GetBytes((short)Tag));
-            bytes.AddRange(BitConverter.GetBytes((short)SidedefRight));
-            bytes.AddRange(BitConverter.GetBytes((short)SidedefLeft));
+            bytes.AddRange(BitConverter.GetBytes((short)Options));
             return bytes.ToArray();
         }
     }

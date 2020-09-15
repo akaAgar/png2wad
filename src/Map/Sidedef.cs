@@ -1,7 +1,7 @@
 ﻿/*
 ==========================================================================
 This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/one-bit-of-engine)
+by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
 Pixels of Doom is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

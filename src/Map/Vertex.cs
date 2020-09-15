@@ -1,7 +1,7 @@
 ﻿/*
 ==========================================================================
 This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/one-bit-of-engine)
+by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
 Pixels of Doom is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -16,18 +16,34 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 */
 
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 
-namespace PixelsOfDoom.Config
+namespace PixelsOfDoom.Map
 {
-    public struct PixelSetting
+    public struct Vertex
     {
-        public int[] FloorHeight { get; }
-        public int[] CeilingHeight { get; }
-        public int[] SectorSpecial { get; }
-        public int[] LineSpecial { get; }
+        public int X { get; }
+        public int Y { get; }
 
-        public string[] CeilingTexture { get; }
-        public string[] FloorTexture { get; }
-        public string[] WallTexture { get; }
+        public Vertex(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public Vertex(Point pt)
+        {
+            X = pt.X;
+            Y = pt.Y;
+        }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes((short)X));
+            bytes.AddRange(BitConverter.GetBytes((short)Y));
+            return bytes.ToArray();
+        }
     }
 }

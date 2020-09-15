@@ -1,7 +1,7 @@
 ﻿/*
 ==========================================================================
 This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/one-bit-of-engine)
+by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
 Pixels of Doom is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -16,30 +16,19 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace PixelsOfDoom.Config
 {
-    public sealed class GeneratorConfig : IDisposable
+    public sealed class PixelSetting
     {
-        public Dictionary<string, PixelSetting> Pixels { get; }
+        public int[] FloorHeight { get; set; } = new int[] { 0 };
+        public int[] CeilingHeight { get; set; } = new int[] { 64 };
+        public int[] SectorSpecial { get; set; } = new int[] { 0 };
+        public int[] LineSpecial { get; set; } = new int[] { 0 };
 
-        public GeneratorConfig()
-        {
-            Pixels = new Dictionary<string, PixelSetting>();
-        }
-
-        public void Load(string filePath)
-        {
-            Pixels.Clear();
-
-            if (!File.Exists(filePath)) return;
-        }
-
-        public void Dispose()
-        {
-
-        }
+        public string[] CeilingTexture { get; set; } = new string[] { "" };
+        public string[] FloorTexture { get; set; } = new string[] { "" };
+        public string[] WallTexture { get; set; } = new string[] { "" };
+        public string[] WallTextureAlt { get; set; } = new string[] { "" };
     }
 }
