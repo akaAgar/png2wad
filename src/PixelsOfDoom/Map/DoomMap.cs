@@ -48,6 +48,13 @@ namespace PixelsOfDoom.Map
             wad.AddLump("VERTEXES", Vertices.SelectMany(x => x.ToBytes()).ToArray());
         }
 
+        public void AddThing(Point position, int type, ThingAngle angle, ThingOptions options = ThingOptions.AllSkills)
+        {
+            Things.Add(new Thing(position.X, position.Y, (int)angle, type, options));
+        }
+
+
+        public int AddVertex(int x, int y) { return AddVertex(new Point(x, y)); }
         public int AddVertex(Point pt)
         {
             for (int i = 0; i < Vertices.Count; i++)
