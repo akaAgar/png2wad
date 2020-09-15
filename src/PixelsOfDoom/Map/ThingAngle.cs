@@ -15,19 +15,13 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using System;
-
 namespace PixelsOfDoom.Map
 {
-    [Flags]
-    public enum ThingOptions
+    public enum ThingAngle
     {
-        Skill12 = 1,
-        Skill3 = 2,
-        Skill45 = 4,
-        Deaf = 8,
-        MultiplayerOnly = 16,
-
-        AllSkills = Skill12 | Skill3 | Skill45
+        East = 0,
+        North = 90,
+        West = 180,
+        South = 270
     }
 }
