@@ -15,65 +15,143 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using System;
-using System.Drawing;
-#if DEBUG
-using System.Linq;
-#endif
 using PixelsOfDoom.Config;
 using PixelsOfDoom.Generator;
 using PixelsOfDoom.Map;
 using PixelsOfDoom.Wad;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 
 namespace PixelsOfDoom
 {
+    /// <summary>
+    /// Main program. Parses command-line arguments and creates an instance of the generator.
+    /// </summary>
     public sealed class PixelsOfDoomProgram : IDisposable
     {
+        /// <summary>
+        /// Static Main() method. Program entry point.
+        /// </summary>
+        /// <param name="args">Command-line parameters</param>
         private static void Main(string[] args)
         {
-            args = new string[] { "config.ini", "wolf3d_e1m1.png" };
-
+#if DEBUG
+            args = new string[] { "output.wad", @"..\Release\config.ini", @"..\Release\wolf3d_e1m1.png" };
+#endif
+            
             using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="args">Command-line parameters</param>
         public PixelsOfDoomProgram(string[] args)
         {
-#if DEBUG
-            args = (from string a in args select @"..\..\media\" + a).ToArray();
-#endif
+            if (!ParseArguments(args, out string wadFile, out string configFile, out string[] mapBitmapFiles))
+                return;
 
-            GeneratorConfig config = new GeneratorConfig(args[0]);
+            GeneratorConfig config = new GeneratorConfig(configFile);
+            MapGenerator generator = new MapGenerator(config);
+            WadFile wad = new WadFile();
 
-            using (WadFile wad = new WadFile())
+            for (int i = 0; i < mapBitmapFiles.Length; i++)
             {
-                using (MapGenerator generator = new MapGenerator())
+                int mapNumber = i + 1;
+
+                if ((config.Doom1Format && (mapNumber > 9)) || (!config.Doom1Format && (mapNumber > 99))) // Too many maps, stop here
+                    break;
+
+                try
                 {
-                    for (int i = 1; i < args.Length; i++)
+                    string mapName = config.Doom1Format ? $"E{config.Episode:0}M{mapNumber:0}" : $"MAP{mapNumber:00}";
+
+                    using (Bitmap bitmap = (Bitmap)Image.FromFile(mapBitmapFiles[i]))
                     {
-                        if ((config.Doom1Format && (i > 9)) || (!config.Doom1Format && (i > 99))) // Too many maps
-                            break;
-
-                        string mapName = config.Doom1Format ? $"E{config.Episode.ToString("0")}M{i.ToString("0")}" : $"MAP{i.ToString("00")}";
-
-                        using (Bitmap bitmap = (Bitmap)Image.FromFile(args[i]))
+                        using (DoomMap map = generator.Generate(mapName, bitmap))
                         {
-                            using (DoomMap map = generator.Generate("MAP01", config, bitmap))
-                            {
-                                map.AddToWad(wad);
-                            }
+                            map.AddToWad(wad);
                         }
                     }
                 }
-
-                wad.SaveToFile("test.wad");
+                catch (Exception)
+                {
+                    continue;
+                }
             }
 
+            wad.SaveToFile(wadFile);
+            wad.Dispose();
+            generator.Dispose();
             config.Dispose();
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Parses command-lines arguments to search for path for the various files.
+        /// </summary>
+        /// <param name="args">Command-line parameters</param>
+        /// <param name="wadFile">Path to the output .wad file</param>
+        /// <param name="configFile">Path to the config .ini file</param>
+        /// <param name="mapBitmapFiles">Array of paths to the .bmp/.png images to create levels from</param>
+        /// <returns>True if all required paths are present, false if they are not</returns>
+        private bool ParseArguments(string[] args, out string wadFile, out string configFile, out string[] mapBitmapFiles)
         {
+            wadFile = null;
+            configFile = null;
+            mapBitmapFiles = new string[0];
 
+            if ((args.Length == 0) || (args == null))
+            {
+                PrintMissingParameterMessage();
+                return false;
+            }
+
+            List<string> mapBitmapFilesList = new List<string>();
+
+            foreach (string a in args)
+            {
+                switch (Path.GetExtension(a).ToLowerInvariant())
+                {
+                    case ".bmp":
+                    case ".png":
+                        if (!File.Exists(a)) break;
+                        mapBitmapFilesList.Add(a);
+                        break;
+
+                    case ".ini":
+                        if (!File.Exists(a)) break;
+                        configFile = a;
+                        break;
+
+                    case ".wad":
+                        wadFile = a;
+                        break;
+                }
+            }
+
+            mapBitmapFiles = mapBitmapFilesList.ToArray();
+
+            if ((mapBitmapFiles.Length > 0) && (configFile != null) && (wadFile != null))
+                return true;
+
+            PrintMissingParameterMessage();
+            return false;
         }
+
+        /// <summary>
+        /// Print error message when a parameter is missing.
+        /// </summary>
+        private void PrintMissingParameterMessage()
+        {
+            Console.WriteLine("Missing parameters.");
+            Console.WriteLine("Parameters must include, in any order: path to an output .wad file, path to a .ini config file, paths to any number of .bmp or .png images");
+        }
+
+        /// <summary>
+        /// IDisposable implementation.
+        /// </summary>
+        public void Dispose() { }
     }
 }
