@@ -26,15 +26,22 @@ namespace PixelsOfDoom.Generator
     public sealed class MapGenerator : IDisposable
     {
         private const ThingAngle DEFAULT_ANGLE = ThingAngle.North;
-        private const int CELL_SIZE = 64;
+        private const int TILE_SIZE = 64;
+        private const int SUBTILE_DIVISIONS = 8;
+        private const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
+
+        private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(TILE_SIZE, -TILE_SIZE);
 
         private readonly Random RNG;
 
-        private int MapWidth { get { return Sectors.GetLength(0); } }
-        private int MapHeight { get { return Sectors.GetLength(1); } }
+        private int MapWidth { get { return Things.GetLength(0); } }
+        private int MapHeight { get { return Things.GetLength(1); } }
+
+        private int MapSubWidth { get { return Sectors.GetLength(0); } }
+        private int MapSubHeight { get { return Sectors.GetLength(1); } }
 
         private int[,] Sectors;
-        private int[,] Things;
+        private bool[,] Things;
 
         public MapGenerator()
         {
@@ -44,18 +51,8 @@ namespace PixelsOfDoom.Generator
         public DoomMap Generate(string name, GeneratorConfig config, Bitmap bitmap)
         {
             DoomMap map = new DoomMap(name);
-
-            int x, y;
-            Sectors = new int[bitmap.Width, bitmap.Height];
-            Things = new int[bitmap.Width, bitmap.Height];
-
-            for (x = 0; x < MapWidth; x++)
-                for (y = 0; y < MapHeight; y++)
-                {
-                    Sectors[x, y] = -2;
-                    Things[x, y] = 0;
-                }
-
+            
+            CreateArrays(bitmap);
             CreateSectors(bitmap, map);
             CreateLines(map);
             CreateThings(map, bitmap, config, 0);
@@ -63,90 +60,148 @@ namespace PixelsOfDoom.Generator
             return map;
         }
 
+        private void CreateArrays(Bitmap bitmap)
+        {
+            int x, y;
+
+            Sectors = new int[bitmap.Width, bitmap.Height];
+            for (x = 0; x < MapSubWidth; x++)
+                for (y = 0; y < MapSubHeight; y++)
+                    Sectors[x, y] = -2;
+
+            Things = new bool[bitmap.Width, bitmap.Height];
+            for (x = 0; x < MapWidth; x++)
+                for (y = 0; y < MapHeight; y++)
+                    Things[x, y] = false;
+        }
+
         private void CreateLines(DoomMap map)
         {
             int x, y;
-            int dX, dY;
-            Point v1, v2; // vertices positions
-            int v1i, v2i; // indices of the vertices
 
-            int sector, neighborSector;
+            bool[,,] linesSet = new bool[MapWidth, MapHeight, 4];
 
-            for (x = 0; x < MapWidth; x++)
-                for (y = 0; y < MapHeight; y++)
+            for (x = 0; x < MapSubWidth; x++)
+                for (y = 0; y < MapSubHeight; y++)
                 {
-                    sector = GetSector(x, y);
+                    int sector = GetSector(x, y);
                     if (sector < 0) continue; // Tile is a wall, do nothing
 
-                    for (dX = -1; dX <= 1; dX++)
-                        for (dY = -1; dY <= 1; dY++)
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (linesSet[x, y, i]) continue; // Line already drawn
+
+                        Point neighborDirection = GetDirectionOffset((WallDirection)i);
+
+                        int neighborSector = GetSector(x + neighborDirection.X, y + neighborDirection.Y);
+                        if (sector == neighborSector) continue;
+
+                        if ((neighborSector >= 0) && ((i == (int)WallDirection.South) || (i == (int)WallDirection.East))) // Make sure two-sided lines aren't drawn twice
+                            continue;
+
+                        bool vertical = (neighborDirection.X != 0);
+
+                        int length = AddLine(map, new Point(x, y), (WallDirection)i, vertical, sector, neighborSector);
+
+                        for (int j = 0; j <length; j++)
                         {
-                            if ((dX == 0) && (dY == 0)) continue;
-                            if ((dX != 0) && (dY != 0)) continue;
-                            neighborSector = GetSector(x + dX, y + dY);
-
-                            if (neighborSector == sector) continue; // Same sector, no need to add a line
-
-                            GetVertices(x, y, dX, dY, out v1, out v2);
-                            v1i = map.AddVertex(v1);
-                            v2i = map.AddVertex(v2);
-
-                            if (neighborSector < 0) // neighbor is a wall
-                            {
-                                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "STARTAN2", sector));
-                                map.Linedefs.Add(new Linedef(v1i, v2i, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
-                            }
-                            else
-                            {
-                                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", neighborSector));
-                                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", sector));
-                                map.Linedefs.Add(new Linedef(v1i, v2i, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
-                            }
+                            Point segmentPosition = new Point(x, y).Add(vertical ? new Point(0, j) : new Point(j, 0));
+                            if (!IsPointOnMap(segmentPosition)) continue;
+                            linesSet[segmentPosition.X, segmentPosition.Y, i] = true;
                         }
+                    }
                 }
         }
 
-        private void GetVertices(int x, int y, int dX, int dY, out Point v1, out Point v2)
+        private static Point GetDirectionOffset(WallDirection direction)
         {
-            v1 = Point.Empty; v2 = Point.Empty;
+            switch (direction)
+            {
+                default: return new Point(0, -1); // case WallDirection.North
+                case WallDirection.East: return new Point(1, 0);
+                case WallDirection.South: return new Point(0, 1);
+                case WallDirection.West: return new Point(-1, 0);
+            }
+        }
 
-            if (dX == -1)
+        private int AddLine(DoomMap map, Point position, WallDirection neighborDirection, bool vertical, int sector, int neighborSector)
+        {
+            bool flipVectors = false;
+            Point vertexOffset = Point.Empty;
+            Point neighborOffset = GetDirectionOffset(neighborDirection);
+
+            switch (neighborDirection)
             {
-                v1 = new Point(x * CELL_SIZE, (y + 1) * -CELL_SIZE);
-                v2 = new Point(x * CELL_SIZE, y * -CELL_SIZE);
+                case WallDirection.West:
+                    flipVectors = true;
+                    break;
+                case WallDirection.East:
+                    vertexOffset = new Point(1, 0);
+                    break;
+                case WallDirection.South:
+                    flipVectors = true;
+                    vertexOffset = new Point(0, 1);
+                    break;
             }
-            else if (dX == 1)
+
+            int v1 = map.AddVertex(position.Add(vertexOffset).Mult(VERTEX_POSITION_MULTIPLIER));
+            int length = 0;
+
+            Point direction = vertical ? new Point(0, 1) : new Point(1, 0);
+
+            do
             {
-                v1 = new Point((x + 1) * CELL_SIZE, y * -CELL_SIZE);
-                v2 = new Point((x + 1) * CELL_SIZE, (y + 1) * -CELL_SIZE);
-            }
-            else if (dY == -1)
+                position = position.Add(direction);
+                length++;
+
+
+                if ((GetSector(position) != sector) || (GetSector(position.Add(neighborOffset)) != neighborSector)) break;
+            } while (true);
+
+            int v2 = map.AddVertex(position.Add(vertexOffset).Mult(VERTEX_POSITION_MULTIPLIER));
+
+            if (flipVectors) { v1 += v2; v2 = v1 - v2; v1 -= v2; } // Quick hack to flip two integers without temporary variable
+
+            if (neighborSector < 0) // neighbor is a wall
             {
-                v1 = new Point(x * CELL_SIZE, y * -CELL_SIZE);
-                v2 = new Point((x + 1) * CELL_SIZE, y * -CELL_SIZE);
+                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "STARTAN2", sector));
+                map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
             }
-            else if (dY == 1)
+            else
             {
-                v1 = new Point((x + 1) * CELL_SIZE, (y + 1) * -CELL_SIZE);
-                v2 = new Point(x * CELL_SIZE, (y + 1) * -CELL_SIZE);
+                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", neighborSector));
+                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", sector));
+                map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
             }
+
+            return length;
         }
 
         private int GetSector(Point position) { return GetSector(position.X, position.Y); }
         private int GetSector(int x, int y)
         {
-            if ((x < 0) || (y < 0) || (x >= MapWidth) || (x >= MapHeight) && (Sectors[x, y] < 0))
+            if ((x < 0) || (y < 0) || (x >= MapWidth) || (y >= MapHeight) && (Sectors[x, y] < 0))
                 return -1;
 
             return Sectors[x, y];
         }
 
+        private bool IsPointOnMap(Point position)
+        {
+            return !((position.X < 0) || (position.Y < 0) || (position.X >= MapWidth) || (position.Y >= MapHeight));
+        }
+
         private void CreateThings(DoomMap map, Bitmap bitmap, GeneratorConfig config, int depth)
         {
             Point position = GetRandomFreeCell();
+            Things[position.X, position.Y] = true;
             ThingAngle angle = GetNonWallFacingAngle(position);
 
-            AddThing(map, position, 1, angle); // Player start
+            position = new Point(
+                (int)((position.X + .5f) * TILE_SIZE),
+                (int)((position.Y + .5f) * TILE_SIZE));
+
+            map.AddThing(position, 1, angle); // Player start
         }
 
         private ThingAngle GetNonWallFacingAngle(Point position)
@@ -163,11 +218,6 @@ namespace PixelsOfDoom.Generator
             return validAngles[RNG.Next(validAngles.Count)];
         }
 
-        private void AddThing(DoomMap map, Point position, int type, ThingAngle angle = DEFAULT_ANGLE, ThingOptions options = ThingOptions.AllSkills)
-        {
-            map.Things.Add(new Thing(position.X * CELL_SIZE + CELL_SIZE / 2, position.Y * -CELL_SIZE + CELL_SIZE / -2, (int)angle, type, options));
-        }
-
         private Point GetRandomFreeCell()
         {
             Point cell;
@@ -175,7 +225,7 @@ namespace PixelsOfDoom.Generator
             do
             {
                 cell = new Point(RNG.Next(MapWidth), RNG.Next(MapHeight));
-            } while ((Sectors[cell.X, cell.Y] < 0) || (Things[cell.X, cell.Y] > 0));
+            } while ((Sectors[cell.X, cell.Y] < 0) || Things[cell.X, cell.Y]);
 
             return cell;
         }
