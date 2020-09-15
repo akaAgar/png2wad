@@ -17,6 +17,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace PixelsOfDoom.Map
 {
@@ -29,6 +30,12 @@ namespace PixelsOfDoom.Map
         {
             X = x;
             Y = y;
+        }
+
+        public Vertex(Point pt)
+        {
+            X = pt.X;
+            Y = pt.Y;
         }
 
         public byte[] ToBytes()
