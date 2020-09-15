@@ -37,9 +37,9 @@ namespace PixelsOfDoom
 
             using (MapGenerator generator = new MapGenerator())
             {
-                using (Bitmap bitmap = (Bitmap)Image.FromFile("wolf3d_e1m1.png"))
+                using (Bitmap bitmap = (Bitmap)Image.FromFile(@"..\..\media\wolf3d_e1m1.png"))
                 {
-                    using (DoomMap map = generator.Generate("MAP01", new GeneratorConfig(), bitmap))
+                    using (DoomMap map = generator.Generate("MAP01", null, bitmap))
                     {
                         map.AddToWad(wad);
                     }
