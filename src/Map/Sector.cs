@@ -15,6 +15,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Generator;
 using PixelsOfDoom.Wad;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,17 @@ namespace PixelsOfDoom.Map
         public int LightLevel { get; }
         public int Special { get; }
         public int Tag { get; }
+
+        public Sector(SectorInfo info)
+        {
+            FloorHeight = info.FloorHeight;
+            CeilingHeight = info.CeilingHeight;
+            FloorTexture = info.FloorTexture;
+            CeilingTexture = info.CeilingTexture;
+            LightLevel = info.LightLevel;
+            Special = info.SectorSpecial;
+            Tag = 0;
+        }
 
         public Sector(int floorHeight, int ceilingHeight, string floorTexture, string ceilingTexture, int lightLevel, int special, int tag)
         {

@@ -20,6 +20,7 @@ using PixelsOfDoom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace PixelsOfDoom.Generator
 {
@@ -41,14 +42,15 @@ namespace PixelsOfDoom.Generator
         private int MapSubHeight { get { return Sectors.GetLength(1); } }
 
         private int[,] Sectors;
+        private List<SectorInfo> SectorsInfo;
         private bool[,] Things;
 
-        private readonly Config.Settings Config;
+        private readonly Settings Settings;
 
-        public MapGenerator(Config.Settings config)
+        public MapGenerator(Settings settings)
         {
             RNG = new Random();
-            Config = config;
+            Settings = settings;
         }
 
         public DoomMap Generate(string name, Bitmap bitmap)
@@ -66,6 +68,8 @@ namespace PixelsOfDoom.Generator
         private void CreateArrays(Bitmap bitmap)
         {
             int x, y;
+
+            SectorsInfo = new List<SectorInfo>();
 
             Sectors = new int[bitmap.Width, bitmap.Height];
             for (x = 0; x < MapSubWidth; x++)
@@ -167,7 +171,7 @@ namespace PixelsOfDoom.Generator
 
             if (neighborSector < 0) // neighbor is a wall
             {
-                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "STARTAN2", sector));
+                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", SectorsInfo[sector].WallTexture, sector));
                 map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
             }
             else
@@ -246,14 +250,16 @@ namespace PixelsOfDoom.Generator
                     if (Sectors[x, y] != -2) continue; // Cell was already checked
 
                     c = bitmap.GetPixel(x, y);
-                    if (c.IsSameRGB(Color.White))
+                    if (Settings[c].PixelType == SettingsPixelType.Wall)
                     {
                         Sectors[x, y] = -1;
                         continue;
                     }
 
-                    FloodFillSector(bitmap, map, x, y, map.Sectors.Count, c);
-                    map.Sectors.Add(new Sector(0, 64, "FLOOR5_4", "FLOOR4_1", 192, 0, 0));
+                    FloodFillSector(bitmap, map, x, y, SectorsInfo.Count, c);
+
+                    SectorsInfo.Add(new SectorInfo(Settings[c]));
+                    map.Sectors.Add(new Sector(SectorsInfo.Last()));
                 }
         }
 
