@@ -22,6 +22,11 @@ namespace PixelsOfDoom
 {
     public static class Toolbox
     {
+        /// <summary>
+        /// (Private) Random number generator.
+        /// </summary>
+        private static readonly Random RNG = new Random();
+
         public static bool IsSameRGB(this Color color, Color other)
         {
             return (color.R == other.R) && (color.G == other.G) && (color.B == other.B);
@@ -95,5 +100,49 @@ namespace PixelsOfDoom
             return null;
         }
 
+        /// <summary>
+        /// Returns a random integer between 0 (inclusive) and maxValue (exclusive).
+        /// </summary>
+        /// <param name="maxValue">The maximum possible value, EXCLUSIVE</param>
+        /// <returns>An integer</returns>
+        public static int RandomInt(int maxValue)
+        {
+            return RNG.Next(maxValue);
+        }
+
+        /// <summary>
+        /// Returns a random integer between minValue (inclusive) and maxValue (exclusive).
+        /// </summary>
+        /// <param name="minValue">The maximum possible value, INCLUSIVE</param>
+        /// <param name="maxValue">The maximum possible value, EXCLUSIVE</param>
+        /// <returns>An integer</returns>
+        public static int RandomInt(int minValue, int maxValue)
+        {
+            return RNG.Next(minValue, maxValue);
+        }
+
+        /// <summary>
+        /// Returns a random element from a array.
+        /// </summary>
+        /// <typeparam name="T">The type of the array</typeparam>
+        /// <param name="array">The array</param>
+        /// <returns>An element from the array</returns>
+        public static T RandomFromArray<T>(T[] array)
+        {
+            if ((array == null) || (array.Length == 0)) return default;
+            return array[RNG.Next(array.Length)];
+        }
+
+        /// <summary>
+        /// Clamps the value between minValue and maxValue.
+        /// </summary>
+        /// <param name="value">A value</param>
+        /// <param name="minValue">Minimum acceptable value</param>
+        /// <param name="maxValue">Maximum acceptable value</param>
+        /// <returns>The clamped value</returns>
+        public static int Clamp(int value, int minValue, int maxValue)
+        {
+            return Math.Max(minValue, Math.Min(maxValue, value));
+        }
     }
 }
