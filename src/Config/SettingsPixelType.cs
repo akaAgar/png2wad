@@ -15,20 +15,14 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using System;
+using INIPlusPlus;
 
 namespace PixelsOfDoom.Config
 {
-    public sealed class PixelSetting
+    public enum SettingsPixelType
     {
-        public int[] FloorHeight { get; set; } = new int[] { 0 };
-        public int[] CeilingHeight { get; set; } = new int[] { 64 };
-        public int[] SectorSpecial { get; set; } = new int[] { 0 };
-        public int[] LineSpecial { get; set; } = new int[] { 0 };
-
-        public string[] CeilingTexture { get; set; } = new string[] { "" };
-        public string[] FloorTexture { get; set; } = new string[] { "" };
-        public string[] WallTexture { get; set; } = new string[] { "" };
-        public string[] WallTextureAlt { get; set; } = new string[] { "" };
+        Door,
+        Room,
+        Wall
     }
 }

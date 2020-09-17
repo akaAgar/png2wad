@@ -43,9 +43,9 @@ namespace PixelsOfDoom.Generator
         private int[,] Sectors;
         private bool[,] Things;
 
-        private readonly GeneratorConfig Config;
+        private readonly Config.Settings Config;
 
-        public MapGenerator(GeneratorConfig config)
+        public MapGenerator(Config.Settings config)
         {
             RNG = new Random();
             Config = config;

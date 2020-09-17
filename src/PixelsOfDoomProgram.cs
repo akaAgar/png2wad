@@ -53,7 +53,7 @@ namespace PixelsOfDoom
             if (!ParseArguments(args, out string wadFile, out string configFile, out string[] mapBitmapFiles))
                 return;
 
-            GeneratorConfig config = new GeneratorConfig(configFile);
+            Config.Settings config = new Config.Settings(configFile);
             MapGenerator generator = new MapGenerator(config);
             WadFile wad = new WadFile();
 
