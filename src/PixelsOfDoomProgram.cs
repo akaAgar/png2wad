@@ -85,7 +85,6 @@ namespace PixelsOfDoom
             wad.SaveToFile(wadFile);
             wad.Dispose();
             generator.Dispose();
-            config.Dispose();
         }
 
         /// <summary>

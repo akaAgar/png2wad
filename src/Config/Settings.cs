@@ -38,7 +38,7 @@ namespace PixelsOfDoom.Config
             {
                 // Load common settings
                 Doom1Format = ini.GetValue("Options", "Doom1Format", false);
-                Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Doom1Format", 1)));
+                Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Episode", 1)));
 
                 Pixels = new Dictionary<int, SettingsPixel>
                 {
