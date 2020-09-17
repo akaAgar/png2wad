@@ -19,15 +19,41 @@ using System;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// Bit flags for a Doom map thing
+    /// </summary>
     [Flags]
     public enum ThingOptions
     {
+        /// <summary>
+        /// Thing is present in skill levels 1 & 2.
+        /// </summary>
         Skill12 = 1,
+
+        /// <summary>
+        /// Thing is present in skill level 3.
+        /// </summary>
         Skill3 = 2,
+
+        /// <summary>
+        /// Thing is present in skill levels 4 & 5.
+        /// </summary>
         Skill45 = 4,
+
+        /// <summary>
+        /// Monster is deaf.
+        /// </summary>
         Deaf = 8,
+
+        /// <summary>
+        /// Thing is only present in multiplayer.
+        /// </summary>
         MultiplayerOnly = 16,
 
+        /// <summary>
+        /// Shortcut: this is present in all skill levels.
+        /// (AllSkills = Skill12 | Skill3 | Skill45)
+        /// </summary>
         AllSkills = Skill12 | Skill3 | Skill45
     }
 }
