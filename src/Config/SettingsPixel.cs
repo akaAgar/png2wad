@@ -23,6 +23,7 @@ namespace PixelsOfDoom.Config
     {
         private const int DEFAULT_CEILING_HEIGHT = 64;
         private const int DEFAULT_FLOOR_HEIGHT = 0;
+        private const int DEFAULT_LIGHT_LEVEL = 164;
         private const string DEFAULT_CEILING_TEXTURE = "FLOOR4_1";
         private const string DEFAULT_FLOOR_TEXTURE = "FLOOR5_4";
         private const string DEFAULT_WALL_TEXTURE = "STARTAN2";
@@ -35,8 +36,11 @@ namespace PixelsOfDoom.Config
         public int[] LineSpecial { get; }
         public int[] SectorSpecial { get; }
 
+        public int[] LightLevel { get; }
+
         public string[] CeilingTexture { get; }
         public string[] FloorTexture { get; }
+        public string[] SpecialFlatTexture { get; }
         public string[] WallTexture { get; }
         public string[] WallTextureAlt { get; }
         public string[] WallTextureAlt2 { get; }
@@ -50,31 +54,39 @@ namespace PixelsOfDoom.Config
             LineSpecial = ini.GetValueArray<int>(section, "LineSpecial");
             SectorSpecial = ini.GetValueArray<int>(section, "SectorSpecial");
 
+            LightLevel = ini.GetValueArray<int>(section, "LightLevel");
+
             CeilingTexture = ini.GetValueArray<string>(section, "CeilingTexture");
             FloorTexture = ini.GetValueArray<string>(section, "FloorTexture");
 
             if (PixelType == SettingsPixelType.Door)
             {
+                SpecialFlatTexture = ini.GetValueArray<string>(section, "DoorFlatTexture");
                 WallTexture = ini.GetValueArray<string>(section, "DoorTexture");
                 WallTextureAlt = ini.GetValueArray<string>(section, "DoorSideTexture");
                 WallTextureAlt2 = ini.GetValueArray<string>(section, "DoorTrackTexture");
             }
             else
             {
+                SpecialFlatTexture = new string[0];
                 WallTexture = ini.GetValueArray<string>(section, "WallTexture");
                 WallTextureAlt = ini.GetValueArray<string>(section, "WallTextureAlt");
-                WallTextureAlt2 = ini.GetValueArray<string>(section, "WallTextureAlt2");
+                WallTextureAlt2 = new string[0];
             }
 
             if (CeilingHeight.Length == 0) CeilingHeight = new int[] { DEFAULT_CEILING_HEIGHT };
             if (FloorHeight.Length == 0) FloorHeight = new int[] { DEFAULT_FLOOR_HEIGHT };
             if (LineSpecial.Length == 0) LineSpecial = new int[] { 0 };
             if (SectorSpecial.Length == 0) SectorSpecial = new int[] { 0 };
-            
+
+            if (LightLevel.Length == 0) LightLevel = new int[] { DEFAULT_LIGHT_LEVEL };
+
             if (CeilingTexture.Length == 0) CeilingTexture = new string[] { DEFAULT_CEILING_TEXTURE };
             if (FloorTexture.Length == 0) FloorTexture = new string[] { DEFAULT_FLOOR_TEXTURE };
+            if (SpecialFlatTexture.Length == 0) SpecialFlatTexture = new string[] { DEFAULT_FLOOR_TEXTURE };
             if (WallTexture.Length == 0) WallTexture = new string[] { DEFAULT_WALL_TEXTURE };
             if (WallTextureAlt.Length == 0) WallTextureAlt = new string[] { DEFAULT_WALLALT_TEXTURE };
+            if (WallTextureAlt2.Length == 0) WallTextureAlt2 = new string[] { DEFAULT_WALLALT_TEXTURE };
         }
 
         public SettingsPixel(SettingsPixelType type)
@@ -86,8 +98,11 @@ namespace PixelsOfDoom.Config
             LineSpecial = new int[] { 0 };
             SectorSpecial = new int[] { 0 };
 
+            LightLevel = new int[] { DEFAULT_LIGHT_LEVEL };
+
             CeilingTexture = new string[] { DEFAULT_CEILING_TEXTURE };
             FloorTexture = new string[] { DEFAULT_FLOOR_TEXTURE };
+            SpecialFlatTexture = new string[] { DEFAULT_FLOOR_TEXTURE };
             WallTexture = new string[] { DEFAULT_WALL_TEXTURE };
             WallTextureAlt = new string[] { DEFAULT_WALLALT_TEXTURE };
             WallTextureAlt2 = new string[] { DEFAULT_WALLALT_TEXTURE };
