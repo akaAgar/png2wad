@@ -172,12 +172,12 @@ namespace PixelsOfDoom.Generator
             if (neighborSector < 0) // neighbor is a wall
             {
                 map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", SectorsInfo[sector].WallTexture, sector));
-                map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible, 0, 0, -1, map.Sidedefs.Count - 1));
+                map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible | LinedefFlags.LowerUnpegged, 0, 0, -1, map.Sidedefs.Count - 1));
             }
             else
             {
-                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", neighborSector));
-                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", "-", sector));
+                map.Sidedefs.Add(new Sidedef(neighborSector, SectorsInfo[neighborSector], SectorsInfo[sector]));
+                map.Sidedefs.Add(new Sidedef(sector, SectorsInfo[sector], SectorsInfo[neighborSector]));
                 map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
             }
 

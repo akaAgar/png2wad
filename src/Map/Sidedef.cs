@@ -15,6 +15,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using PixelsOfDoom.Generator;
 using PixelsOfDoom.Wad;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,16 @@ namespace PixelsOfDoom.Map
             Sector = sector;
         }
 
-		public byte[] ToBytes()
+        public Sidedef(int sectorID, SectorInfo sector, SectorInfo neighborSector)
+        {
+            XOffset = 0; YOffset = 0;
+            MiddleTexture = "-";
+            UpperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? sector.WallTexture : "-";
+            LowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? sector.WallTexture : "-";
+            Sector = sectorID;
+        }
+
+        public byte[] ToBytes()
 		{
 			List<byte> bytes = new List<byte>();
 			bytes.AddRange(BitConverter.GetBytes((short)XOffset));
