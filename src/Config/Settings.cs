@@ -27,6 +27,7 @@ namespace PixelsOfDoom.Config
         private static readonly int DEFAULT_COLOR = Color.Black.ToArgb();
         private static readonly int WALL_COLOR = Color.White.ToArgb();
 
+        public bool BuildNodes { get; }
         public bool Doom1Format { get; }
         public int Episode { get; }
 
@@ -37,6 +38,7 @@ namespace PixelsOfDoom.Config
             using (INIFile ini = new INIFile(filePath))
             {
                 // Load common settings
+                BuildNodes = ini.GetValue("Options", "BuildNodes", true);
                 Doom1Format = ini.GetValue("Options", "Doom1Format", false);
                 Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Episode", 1)));
 

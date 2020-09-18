@@ -21,6 +21,7 @@ using PixelsOfDoom.Map;
 using PixelsOfDoom.Wad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 
@@ -53,7 +54,7 @@ namespace PixelsOfDoom
             if (!ParseArguments(args, out string wadFile, out string configFile, out string[] mapBitmapFiles))
                 return;
 
-            Config.Settings config = new Config.Settings(configFile);
+            Settings config = new Settings(configFile);
             MapGenerator generator = new MapGenerator(config);
             WadFile wad = new WadFile();
 
@@ -85,6 +86,29 @@ namespace PixelsOfDoom
             wad.SaveToFile(wadFile);
             wad.Dispose();
             generator.Dispose();
+
+            if (config.BuildNodes)
+            {
+                Process bspProcess;
+
+                switch (Environment.OSVersion.Platform)
+                {
+                    case PlatformID.Win32NT:
+                    case PlatformID.Win32S:
+                    case PlatformID.Win32Windows:
+                    case PlatformID.WinCE:
+                        Console.WriteLine("Building nodes with bsp-w32.exe...");
+#if DEBUG
+                        bspProcess = Process.Start(@"..\Release\bsp-w32.exe", $"\"{wadFile}\" -o \"{wadFile}\"");
+#else
+                        bspProcess = Process.Start("bsp-w32.exe", $"\"{wadFile}\" -o \"{wadFile}\"");
+#endif
+                        bspProcess.WaitForExit();
+                        if (bspProcess.ExitCode != 0)
+                            Console.WriteLine("Failed to build nodes!");
+                        break;
+                }
+            }
         }
 
         /// <summary>
