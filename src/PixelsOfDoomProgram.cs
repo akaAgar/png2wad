@@ -41,7 +41,7 @@ namespace PixelsOfDoom
 #if DEBUG
             args = new string[] { "output.wad", @"..\Release\config.ini", @"..\Release\wolf3d_e1m1.png", @"..\Release\cave.png" };
 #endif
-            
+
             using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
         }
 
@@ -54,7 +54,7 @@ namespace PixelsOfDoom
             if (!ParseArguments(args, out string wadFile, out string configFile, out string[] mapBitmapFiles))
                 return;
 
-            Settings config = new Settings(configFile);
+            Preferences config = new Preferences(configFile);
             MapGenerator generator = new MapGenerator(config);
             WadFile wad = new WadFile();
 
@@ -73,7 +73,10 @@ namespace PixelsOfDoom
 
                     using (Bitmap bitmap = (Bitmap)Image.FromFile(mapBitmapFiles[i]))
                     {
-                        using (DoomMap map = generator.Generate(mapName, bitmap))
+                        int depth = i;
+                        if (config.Doom1Format) depth += 2 * config.Episode;
+
+                        using (DoomMap map = generator.Generate(mapName, bitmap, depth))
                         {
                             map.AddToWad(wad);
                         }
@@ -117,11 +120,11 @@ namespace PixelsOfDoom
                 }
             }
 
-#if DEBUG
-            Console.WriteLine();
-            Console.WriteLine("Press any key");
-            Console.ReadKey();
-#endif
+//#if DEBUG
+//            Console.WriteLine();
+//            Console.WriteLine("Press any key");
+//            Console.ReadKey();
+//#endif
         }
 
         /// <summary>
