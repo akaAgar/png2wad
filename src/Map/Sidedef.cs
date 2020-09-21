@@ -45,8 +45,18 @@ namespace PixelsOfDoom.Map
         {
             XOffset = 0; YOffset = 0;
             MiddleTexture = "-";
-            UpperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? sector.WallTexture : "-";
-            LowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? sector.WallTexture : "-";
+            
+            if (neighborSector.Type == TileType.Door)
+            {
+                UpperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? neighborSector.WallTextureUpper : "-";
+                LowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? neighborSector.WallTextureLower : "-";
+            }
+            else
+            {
+                UpperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? sector.WallTexture : "-";
+                LowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? sector.WallTexture : "-";
+            }
+
             Sector = sectorID;
         }
 
