@@ -41,6 +41,7 @@
     <Compile Include="Config\SettingsPixelType.cs" />
     <Compile Include="Config\SettingsPixel.cs" />
     <Compile Include="Generator\SectorInfo.cs" />
+    <Compile Include="Generator\SubTile.cs" />
     <Compile Include="Generator\WallDirection.cs" />
     <Compile Include="Imports\ini-plus-plus\INIFile.cs" />
     <Compile Include="Imports\ini-plus-plus\INIFileSection.cs" />
