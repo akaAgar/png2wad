@@ -69,12 +69,22 @@ namespace PixelsOfDoom.Config
         /// <returns>A SettingsPixel struct</returns>
         public SettingsPixel this[Color color]
         {
+            get { return this[color.ToArgb()]; }
+        }
+
+
+        /// <summary>
+        /// Returns SettingsPixel info for a color.
+        /// </summary>
+        /// <param name="colorARGB">The pixel color as an ARGB Int32</param>
+        /// <returns>A SettingsPixel struct</returns>
+        public SettingsPixel this[int colorARGB]
+        {
             get
             {
-                int colorInt = color.ToArgb();
-                if (colorInt == WALL_COLOR) { } // TODO
+                if (colorARGB == WALL_COLOR) { } // TODO
 
-                return Pixels.ContainsKey(colorInt) ? Pixels[colorInt] : Pixels[DEFAULT_COLOR];
+                return Pixels.ContainsKey(colorARGB) ? Pixels[colorARGB] : Pixels[DEFAULT_COLOR];
             }
         }
     }
