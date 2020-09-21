@@ -88,7 +88,8 @@ namespace PixelsOfDoom.Generator
                                 type = SettingsPixelType.Room;
 
                                 if ((x > 0) && (x < bitmap.Width - 1) &&
-                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType == SettingsPixelType.Wall) && (Settings[bitmap.GetPixel(x + 1, y)].PixelType == SettingsPixelType.Wall))
+                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType != SettingsPixelType.Room) &&
+                                    (Settings[bitmap.GetPixel(x + 1, y)].PixelType != SettingsPixelType.Room))
                                 {
                                     if ((sY == 3) || (sY == 4)) type = SettingsPixelType.Door;
                                 }
