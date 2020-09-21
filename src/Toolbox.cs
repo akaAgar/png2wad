@@ -16,6 +16,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace PixelsOfDoom
@@ -131,6 +132,12 @@ namespace PixelsOfDoom
         {
             if ((array == null) || (array.Length == 0)) return default;
             return array[RNG.Next(array.Length)];
+        }
+
+        public static T RandomFromList<T>(List<T> list)
+        {
+            if ((list == null) || (list.Count == 0)) return default;
+            return list[RNG.Next(list.Count)];
         }
 
         /// <summary>
