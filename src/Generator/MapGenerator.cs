@@ -28,10 +28,10 @@ namespace PixelsOfDoom.Generator
     {
         private const ThingAngle DEFAULT_ANGLE = ThingAngle.North;
         private const int TILE_SIZE = 64;
-        private const int SUBTILE_DIVISIONS = 8;
         private const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
+        private const int SUBTILE_DIVISIONS = 8;
 
-        private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(TILE_SIZE, -TILE_SIZE);
+        private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(SUBTILE_SIZE, -SUBTILE_SIZE);
 
         private readonly Random RNG;
 
@@ -56,11 +56,11 @@ namespace PixelsOfDoom.Generator
         public DoomMap Generate(string name, Bitmap bitmap)
         {
             DoomMap map = new DoomMap(name);
-            
+
             CreateArrays(bitmap);
             CreateSectors(bitmap, map);
             CreateLines(map);
-            CreateThings(map, bitmap, 0);
+            CreateThings(map, 0);
 
             return map;
         }
@@ -71,7 +71,7 @@ namespace PixelsOfDoom.Generator
 
             SectorsInfo = new List<SectorInfo>();
 
-            Sectors = new int[bitmap.Width, bitmap.Height];
+            Sectors = new int[bitmap.Width * SUBTILE_DIVISIONS, bitmap.Height * SUBTILE_DIVISIONS];
             for (x = 0; x < MapSubWidth; x++)
                 for (y = 0; y < MapSubHeight; y++)
                     Sectors[x, y] = -2;
@@ -86,7 +86,7 @@ namespace PixelsOfDoom.Generator
         {
             int x, y;
 
-            bool[,,] linesSet = new bool[MapWidth, MapHeight, 4];
+            bool[,,] linesSet = new bool[MapSubWidth, MapSubHeight, 4];
 
             for (x = 0; x < MapSubWidth; x++)
                 for (y = 0; y < MapSubHeight; y++)
@@ -101,19 +101,19 @@ namespace PixelsOfDoom.Generator
                         Point neighborDirection = GetDirectionOffset((WallDirection)i);
 
                         int neighborSector = GetSector(x + neighborDirection.X, y + neighborDirection.Y);
-                        if (sector == neighborSector) continue;
+                        if (sector == neighborSector) continue; // Same sector on both sides, no need to add a line
 
-                        if ((neighborSector >= 0) && ((i == (int)WallDirection.South) || (i == (int)WallDirection.East))) // Make sure two-sided lines aren't drawn twice
-                            continue;
+                        if ((neighborSector >= 0) && ((i == (int)WallDirection.South) || (i == (int)WallDirection.East)))
+                            continue; // Make sure two-sided lines aren't drawn twice
 
                         bool vertical = (neighborDirection.X != 0);
 
                         int length = AddLine(map, new Point(x, y), (WallDirection)i, vertical, sector, neighborSector);
 
-                        for (int j = 0; j <length; j++)
+                        for (int j = 0; j < length; j++)
                         {
                             Point segmentPosition = new Point(x, y).Add(vertical ? new Point(0, j) : new Point(j, 0));
-                            if (!IsPointOnMap(segmentPosition)) continue;
+                            if (!IsSubPointOnMap(segmentPosition)) continue;
                             linesSet[segmentPosition.X, segmentPosition.Y, i] = true;
                         }
                     }
@@ -187,18 +187,18 @@ namespace PixelsOfDoom.Generator
         private int GetSector(Point position) { return GetSector(position.X, position.Y); }
         private int GetSector(int x, int y)
         {
-            if ((x < 0) || (y < 0) || (x >= MapWidth) || (y >= MapHeight) && (Sectors[x, y] < 0))
+            if ((x < 0) || (y < 0) || (x >= MapSubWidth) || (y >= MapSubHeight) || (Sectors[x, y] < 0))
                 return -1;
 
             return Sectors[x, y];
         }
 
-        private bool IsPointOnMap(Point position)
+        private bool IsSubPointOnMap(Point position)
         {
-            return !((position.X < 0) || (position.Y < 0) || (position.X >= MapWidth) || (position.Y >= MapHeight));
+            return !((position.X < 0) || (position.Y < 0) || (position.X >= MapSubWidth) || (position.Y >= MapSubHeight));
         }
 
-        private void CreateThings(DoomMap map, Bitmap bitmap, int depth)
+        private void CreateThings(DoomMap map, int depth)
         {
             Point position = GetRandomFreeCell();
             Things[position.X, position.Y] = true;
@@ -239,26 +239,56 @@ namespace PixelsOfDoom.Generator
 
         private void CreateSectors(Bitmap bitmap, DoomMap map)
         {
+            int x, y, sX, sY, color;
+
             map.Sectors.Clear();
 
-            int x, y;
-            Color c;
-
+            int[,] subTiles = new int[MapSubWidth, MapSubHeight];
             for (x = 0; x < MapWidth; x++)
                 for (y = 0; y < MapHeight; y++)
                 {
+                    color = bitmap.GetPixel(x, y).ToArgb();
+
+                    for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
+                        for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)
+                            subTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = color;
+                }
+
+
+            for (x = 0; x < MapSubWidth; x++)
+                for (y = 0; y < MapSubHeight; y++)
+                {
                     if (Sectors[x, y] != -2) continue; // Cell was already checked
 
-                    c = bitmap.GetPixel(x, y);
-                    if (Settings[c].PixelType == SettingsPixelType.Wall)
+                    color = subTiles[x, y];
+                    if (Settings[color].PixelType == SettingsPixelType.Wall)
                     {
                         Sectors[x, y] = -1;
                         continue;
                     }
 
-                    FloodFillSector(bitmap, map, x, y, SectorsInfo.Count, c);
+                    Stack<Point> pixels = new Stack<Point>();
+                    Point pt = new Point(x, y);
+                    pixels.Push(pt);
 
-                    SectorsInfo.Add(new SectorInfo(Settings[c]));
+                    while (pixels.Count > 0)
+                    {
+                        Point a = pixels.Pop();
+
+                        if (a.X < MapSubWidth && a.X > 0 && a.Y < MapSubHeight && a.Y > 0)
+                        {
+                            if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y] == color))
+                            {
+                                Sectors[a.X, a.Y] = SectorsInfo.Count;
+                                pixels.Push(new Point(a.X - 1, a.Y));
+                                pixels.Push(new Point(a.X + 1, a.Y));
+                                pixels.Push(new Point(a.X, a.Y - 1));
+                                pixels.Push(new Point(a.X, a.Y + 1));
+                            }
+                        }
+                    }
+
+                    SectorsInfo.Add(new SectorInfo(Settings[color]));
                     map.Sectors.Add(new Sector(SectorsInfo.Last()));
                 }
         }
@@ -266,30 +296,6 @@ namespace PixelsOfDoom.Generator
         public void Dispose()
         {
 
-        }
-
-        private void FloodFillSector(Bitmap bitmap, DoomMap map, int x, int y, int sector, Color color)
-        {
-            Stack<Point> pixels = new Stack<Point>();
-            Point pt = new Point(x, y);
-            pixels.Push(pt);
-
-            while (pixels.Count > 0)
-            {
-                Point a = pixels.Pop();
-                
-                if (a.X < MapWidth && a.X > 0 && a.Y < MapHeight && a.Y > 0)
-                {
-                    if ((Sectors[a.X, a.Y] == -2) && (bitmap.GetPixel(a.X, a.Y) == color))
-                    {
-                        Sectors[a.X, a.Y] = sector;
-                        pixels.Push(new Point(a.X - 1, a.Y));
-                        pixels.Push(new Point(a.X + 1, a.Y));
-                        pixels.Push(new Point(a.X, a.Y - 1));
-                        pixels.Push(new Point(a.X, a.Y + 1));
-                    }
-                }
-            }
         }
     }
 }
