@@ -39,7 +39,7 @@ namespace PixelsOfDoom
         private static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { "output.wad", @"..\Release\config.ini", @"..\Release\wolf3d_e1m1.png" };
+            args = new string[] { "output.wad", @"..\Release\config.ini", @"..\Release\wolf3d_e1m1.png", @"..\Release\cave.png" };
 #endif
             
             using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
