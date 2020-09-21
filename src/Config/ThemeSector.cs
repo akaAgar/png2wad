@@ -15,14 +15,16 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using INIPlusPlus;
-
 namespace PixelsOfDoom.Config
 {
-    public enum SettingsPixelType
+    public enum ThemeSector
     {
-        Door,
-        Room,
-        Wall
+        Default,
+        DoorSide,
+        Entrance,
+        Exit,
+        Exterior,
+        SpecialCeiling,
+        SpecialFloor
     }
 }
