@@ -22,7 +22,7 @@ namespace PixelsOfDoom.Generator
         public string WallTextureAlt2 { get; }
 
 
-        public SectorInfo(SettingsPixel pixel)
+        public SectorInfo(SettingsPixel pixel, bool sectorIsADoor = false)
         {
             SectorType = pixel.PixelType;
 
@@ -39,6 +39,11 @@ namespace PixelsOfDoom.Generator
             WallTexture = Toolbox.RandomFromArray(pixel.WallTexture);
             WallTextureAlt = Toolbox.RandomFromArray(pixel.WallTextureAlt);
             WallTextureAlt2 = Toolbox.RandomFromArray(pixel.WallTextureAlt2);
+
+            if (sectorIsADoor)
+            {
+                CeilingHeight = FloorHeight;
+            }
         }
     }
 }

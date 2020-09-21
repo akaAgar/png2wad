@@ -38,9 +38,10 @@ namespace PixelsOfDoom.Generator
         private int MapWidth { get { return Things.GetLength(0); } }
         private int MapHeight { get { return Things.GetLength(1); } }
 
-        private int MapSubWidth { get { return Sectors.GetLength(0); } }
-        private int MapSubHeight { get { return Sectors.GetLength(1); } }
+        private int MapSubWidth { get { return SubTiles.GetLength(0); } }
+        private int MapSubHeight { get { return SubTiles.GetLength(1); } }
 
+        private SubTile[,] SubTiles;
         private int[,] Sectors;
         private List<SectorInfo> SectorsInfo;
         private bool[,] Things;
@@ -58,7 +59,7 @@ namespace PixelsOfDoom.Generator
             DoomMap map = new DoomMap(name);
 
             CreateArrays(bitmap);
-            CreateSectors(bitmap, map);
+            CreateSectors(map);
             CreateLines(map);
             CreateThings(map, 0);
 
@@ -67,18 +68,48 @@ namespace PixelsOfDoom.Generator
 
         private void CreateArrays(Bitmap bitmap)
         {
-            int x, y;
+            int x, y, sX, sY, color;
 
             SectorsInfo = new List<SectorInfo>();
 
+            SubTiles = new SubTile[bitmap.Width * SUBTILE_DIVISIONS, bitmap.Height * SUBTILE_DIVISIONS];
+            for (x = 0; x < bitmap.Width; x++)
+                for (y = 0; y < bitmap.Height; y++)
+                {
+                    color = bitmap.GetPixel(x, y).ToArgb();
+
+                    for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
+                        for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)
+                        {
+                            SettingsPixelType type = Settings[color].PixelType;
+
+                            if (type == SettingsPixelType.Door)
+                            {
+                                type = SettingsPixelType.Room;
+
+                                if ((x > 0) && (x < bitmap.Width - 1) &&
+                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType == SettingsPixelType.Wall) && (Settings[bitmap.GetPixel(x + 1, y)].PixelType == SettingsPixelType.Wall))
+                                {
+                                    if ((sY == 3) || (sY == 4)) type = SettingsPixelType.Door;
+                                }
+                                else
+                                {
+                                    if ((sX == 3) || (sX == 4)) type = SettingsPixelType.Door;
+                                }
+                            }
+
+                            SubTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = new SubTile(color, type);
+                        }
+                }
+
             Sectors = new int[bitmap.Width * SUBTILE_DIVISIONS, bitmap.Height * SUBTILE_DIVISIONS];
-            for (x = 0; x < MapSubWidth; x++)
-                for (y = 0; y < MapSubHeight; y++)
+            for (x = 0; x < bitmap.Width * SUBTILE_DIVISIONS; x++)
+                for (y = 0; y < bitmap.Height * SUBTILE_DIVISIONS; y++)
                     Sectors[x, y] = -2;
 
             Things = new bool[bitmap.Width, bitmap.Height];
-            for (x = 0; x < MapWidth; x++)
-                for (y = 0; y < MapHeight; y++)
+            for (x = 0; x < bitmap.Width; x++)
+                for (y = 0; y < bitmap.Height; y++)
                     Things[x, y] = false;
         }
 
@@ -232,61 +263,23 @@ namespace PixelsOfDoom.Generator
             do
             {
                 cell = new Point(RNG.Next(MapWidth), RNG.Next(MapHeight));
-            } while ((Sectors[cell.X, cell.Y] < 0) || Things[cell.X, cell.Y]);
+            } while ((Sectors[cell.X * SUBTILE_DIVISIONS, cell.Y * SUBTILE_DIVISIONS] < 0) || Things[cell.X, cell.Y]);
 
             return cell;
         }
 
-        private void CreateSectors(Bitmap bitmap, DoomMap map)
+        private void CreateSectors(DoomMap map)
         {
-            int x, y, sX, sY, color;
+            int x, y;
 
             map.Sectors.Clear();
-
-            SubTile[,] subTiles = new SubTile[MapSubWidth, MapSubHeight];
-            for (x = 0; x < MapWidth; x++)
-                for (y = 0; y < MapHeight; y++)
-                {
-                    color = bitmap.GetPixel(x, y).ToArgb();
-
-                    for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
-                        for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)
-                        {
-                            SettingsPixelType type = Settings[color].PixelType;
-
-                            if (type == SettingsPixelType.Door)
-                            {
-                                type = SettingsPixelType.Room;
-
-                                if ((x > 0) && (x < MapWidth - 1) &&
-                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType == SettingsPixelType.Wall) && (Settings[bitmap.GetPixel(x + 1, y)].PixelType == SettingsPixelType.Wall))
-                                {
-                                    if ((sY == 3) || (sY == 4)) type = SettingsPixelType.Door;
-                                }
-                                else
-                                {
-                                    if ((sX == 3) || (sX == 4)) type = SettingsPixelType.Door;
-                                }
-                            }
-
-                            subTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = new SubTile(color, type);
-                        }
-                }
-
 
             for (x = 0; x < MapSubWidth; x++)
                 for (y = 0; y < MapSubHeight; y++)
                 {
                     if (Sectors[x, y] != -2) continue; // Cell was already checked
 
-                    //color = subTiles[x, y];
-                    //if (Settings[color].PixelType == SettingsPixelType.Wall)
-                    //{
-                    //    Sectors[x, y] = -1;
-                    //    continue;
-                    //}
-
-                    if (subTiles[x, y].TileType == SettingsPixelType.Wall)
+                    if (SubTiles[x, y].TileType == SettingsPixelType.Wall)
                     {
                         Sectors[x, y] = -1;
                         continue;
@@ -302,8 +295,7 @@ namespace PixelsOfDoom.Generator
 
                         if (a.X < MapSubWidth && a.X > 0 && a.Y < MapSubHeight && a.Y > 0)
                         {
-                            //if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y] == color))
-                            if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y].Equals(subTiles[x, y])))
+                            if ((Sectors[a.X, a.Y] == -2) && (SubTiles[a.X, a.Y].Equals(SubTiles[x, y])))
                             {
                                 Sectors[a.X, a.Y] = SectorsInfo.Count;
                                 pixels.Push(new Point(a.X - 1, a.Y));
@@ -314,8 +306,7 @@ namespace PixelsOfDoom.Generator
                         }
                     }
 
-                    //SectorsInfo.Add(new SectorInfo(Settings[color]));
-                    SectorsInfo.Add(new SectorInfo(Settings[subTiles[x, y].Color]));
+                    SectorsInfo.Add(new SectorInfo(Settings[SubTiles[x, y].Color], SubTiles[x, y].TileType == SettingsPixelType.Door));
                     map.Sectors.Add(new Sector(SectorsInfo.Last()));
                 }
         }
