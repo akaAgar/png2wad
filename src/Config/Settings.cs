@@ -24,8 +24,8 @@ namespace PixelsOfDoom.Config
 {
     public struct Settings
     {
-        private static readonly int DEFAULT_COLOR = Color.Black.ToArgb();
-        private static readonly int WALL_COLOR = Color.White.ToArgb();
+        public static readonly int DEFAULT_COLOR = Color.Black.ToArgb();
+        public static readonly int WALL_COLOR = Color.White.ToArgb();
 
         public bool BuildNodes { get; }
         public bool Doom1Format { get; }
