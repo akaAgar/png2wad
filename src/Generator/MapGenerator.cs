@@ -26,80 +26,114 @@ namespace PixelsOfDoom.Generator
 {
     public sealed class MapGenerator : IDisposable
     {
-        private const ThingAngle DEFAULT_ANGLE = ThingAngle.North;
-        private const int TILE_SIZE = 64;
-        private const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
-        private const int SUBTILE_DIVISIONS = 8;
+        public const int TILE_SIZE = 64;
+        public const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
+        public const int SUBTILE_DIVISIONS = 8;
 
         private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(SUBTILE_SIZE, -SUBTILE_SIZE);
 
         private readonly Random RNG;
 
-        private int MapWidth { get { return Things.GetLength(0); } }
-        private int MapHeight { get { return Things.GetLength(1); } }
-
         private int MapSubWidth { get { return SubTiles.GetLength(0); } }
         private int MapSubHeight { get { return SubTiles.GetLength(1); } }
 
-        private SubTile[,] SubTiles;
+        private PreferencesTheme Theme;
+        private string[] ThemeTextures;
+        private TileType[,] SubTiles;
         private int[,] Sectors;
         private List<SectorInfo> SectorsInfo;
-        private bool[,] Things;
 
-        private readonly Settings Settings;
+        private readonly Preferences Preferences;
 
-        public MapGenerator(Settings settings)
+        public MapGenerator(Preferences preferences)
         {
             RNG = new Random();
-            Settings = settings;
+            Preferences = preferences;
         }
 
-        public DoomMap Generate(string name, Bitmap bitmap)
+        public DoomMap Generate(string name, Bitmap bitmap, int depth)
         {
+            if (bitmap == null) return null;
+            
             DoomMap map = new DoomMap(name);
 
+            CreateTheme(bitmap);
             CreateArrays(bitmap);
             CreateSectors(map);
             CreateLines(map);
-            CreateThings(map, 0);
+
+            using (ThingsMaker thingsMaker = new ThingsMaker(Theme))
+            {
+                thingsMaker.CreateThings(map, SubTiles, depth);
+            }
 
             return map;
         }
 
+        private void CreateTheme(Bitmap bitmap)
+        {
+            Theme = Preferences.GetTheme(bitmap.GetPixel(0, 0));
+            bitmap.SetPixel(0, 0, Color.White);
+            ThemeTextures = new string[PreferencesTheme.THEME_TEXTURES_COUNT];
+
+            for (int i = 0; i < PreferencesTheme.THEME_TEXTURES_COUNT; i++)
+                ThemeTextures[i] = Toolbox.RandomFromArray(Theme.Textures[i]);
+        }
+
+        private TileType GetTileTypeFromPixel(Color pixel)
+        {
+            if (pixel.IsSameRGB(Color.White)) return TileType.Wall;
+
+            if (pixel.IsSameRGB(Color.FromArgb(0, 0, 255))) return TileType.RoomExterior;
+            if (pixel.IsSameRGB(Color.FromArgb(0, 128, 0))) return TileType.RoomSpecialCeiling;
+            if (pixel.IsSameRGB(Color.FromArgb(255, 0, 0))) return TileType.RoomSpecialFloor;
+
+            if (pixel.IsSameRGB(Color.FromArgb(128, 128, 0))) return TileType.Door;
+            if (pixel.IsSameRGB(Color.Magenta)) return TileType.Secret;
+            
+            if (pixel.IsSameRGB(Color.Yellow)) return TileType.Entrance;
+            if (pixel.IsSameRGB(Color.Lime)) return TileType.Exit;
+
+            return TileType.Room;
+        }
+
         private void CreateArrays(Bitmap bitmap)
         {
-            int x, y, sX, sY, color;
+            int x, y, sX, sY;
+            TileType tileType, subTileType;
 
             SectorsInfo = new List<SectorInfo>();
 
-            SubTiles = new SubTile[bitmap.Width * SUBTILE_DIVISIONS, bitmap.Height * SUBTILE_DIVISIONS];
+            SubTiles = new TileType[bitmap.Width * SUBTILE_DIVISIONS, bitmap.Height * SUBTILE_DIVISIONS];
             for (x = 0; x < bitmap.Width; x++)
                 for (y = 0; y < bitmap.Height; y++)
                 {
-                    color = bitmap.GetPixel(x, y).ToArgb();
+                    tileType = GetTileTypeFromPixel(bitmap.GetPixel(x, y));
 
                     for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
                         for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)
                         {
-                            SettingsPixelType type = Settings[color].PixelType;
+                            subTileType = tileType;
 
-                            if (type == SettingsPixelType.Door)
+                            if (tileType == TileType.Door)
                             {
-                                type = SettingsPixelType.Room;
+                                subTileType = TileType.DoorSide;
 
                                 if ((x > 0) && (x < bitmap.Width - 1) &&
-                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType != SettingsPixelType.Room) &&
-                                    (Settings[bitmap.GetPixel(x + 1, y)].PixelType != SettingsPixelType.Room))
+                                    (GetTileTypeFromPixel(bitmap.GetPixel(x - 1, y)) != TileType.Room) &&
+                                    (GetTileTypeFromPixel(bitmap.GetPixel(x + 1, y)) != TileType.Room))
                                 {
-                                    if ((sY == 3) || (sY == 4)) type = SettingsPixelType.Door;
+                                    if ((sY == 3) || (sY == 4))
+                                        subTileType = TileType.Door;
                                 }
                                 else
                                 {
-                                    if ((sX == 3) || (sX == 4)) type = SettingsPixelType.Door;
+                                    if ((sX == 3) || (sX == 4))
+                                        subTileType = TileType.Door;
                                 }
                             }
 
-                            SubTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = new SubTile(color, type);
+                            SubTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = subTileType;
                         }
                 }
 
@@ -107,11 +141,6 @@ namespace PixelsOfDoom.Generator
             for (x = 0; x < bitmap.Width * SUBTILE_DIVISIONS; x++)
                 for (y = 0; y < bitmap.Height * SUBTILE_DIVISIONS; y++)
                     Sectors[x, y] = -2;
-
-            Things = new bool[bitmap.Width, bitmap.Height];
-            for (x = 0; x < bitmap.Width; x++)
-                for (y = 0; y < bitmap.Height; y++)
-                    Things[x, y] = false;
         }
 
         private void CreateLines(DoomMap map)
@@ -168,10 +197,9 @@ namespace PixelsOfDoom.Generator
             bool flipVectors = false;
             Point vertexOffset = Point.Empty;
             Point neighborOffset = GetDirectionOffset(neighborDirection);
-            Point neighborPosition = position.Add(neighborOffset);
+            Point neighborPosition;
 
-            bool isADoor = (GetSubTile(position).TileType == SettingsPixelType.Door) || (GetSubTile(neighborPosition).TileType == SettingsPixelType.Door);
-            bool needsFlipping = GetSubTile(position).TileType == SettingsPixelType.Door;
+            bool needsFlipping = SectorsInfo[sector].LinedefSpecial > 0;
 
             switch (neighborDirection)
             {
@@ -206,14 +234,14 @@ namespace PixelsOfDoom.Generator
 
             if (flipVectors) { v1 += v2; v2 = v1 - v2; v1 -= v2; } // Quick hack to flip two integers without temporary variable
 
-            if (neighborSector < 0) // neighbor is a wall
+            if (neighborSector < 0) // neighbor is a wall, create an impassible linedef
             {
                 map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", SectorsInfo[sector].WallTexture, sector));
                 map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible | LinedefFlags.LowerUnpegged, 0, 0, -1, map.Sidedefs.Count - 1));
             }
-            else
+            else // neighbor is another sector, create a two-sided linedef
             {
-                int lineSpecial = isADoor ? 1 : 0;
+                int lineSpecial = Math.Max(SectorsInfo[sector].LinedefSpecial, SectorsInfo[neighborSector].LinedefSpecial);
 
                 map.Sidedefs.Add(new Sidedef(neighborSector, SectorsInfo[neighborSector], SectorsInfo[sector]));
                 map.Sidedefs.Add(new Sidedef(sector, SectorsInfo[sector], SectorsInfo[neighborSector]));
@@ -236,11 +264,11 @@ namespace PixelsOfDoom.Generator
             return Sectors[x, y];
         }
 
-        private SubTile GetSubTile(Point position) { return GetSubTile(position.X, position.Y); }
-        private SubTile GetSubTile(int x, int y)
+        private TileType GetSubTile(Point position) { return GetSubTile(position.X, position.Y); }
+        private TileType GetSubTile(int x, int y)
         {
             if ((x < 0) || (y < 0) || (x >= MapSubWidth) || (y >= MapSubHeight))
-                return new SubTile(Settings.WALL_COLOR, SettingsPixelType.Wall);
+                return TileType.Wall;
 
             return SubTiles[x, y];
         }
@@ -250,44 +278,7 @@ namespace PixelsOfDoom.Generator
             return !((position.X < 0) || (position.Y < 0) || (position.X >= MapSubWidth) || (position.Y >= MapSubHeight));
         }
 
-        private void CreateThings(DoomMap map, int depth)
-        {
-            Point position = GetRandomFreeCell();
-            Things[position.X, position.Y] = true;
-            ThingAngle angle = GetNonWallFacingAngle(position);
-
-            position = new Point(
-                (int)((position.X + .5f) * TILE_SIZE),
-                (int)((position.Y + .5f) * TILE_SIZE));
-
-            map.AddThing(position, 1, angle); // Player start
-        }
-
-        private ThingAngle GetNonWallFacingAngle(Point position)
-        {
-            if (GetSector(position) < 0) return DEFAULT_ANGLE;
-
-            List<ThingAngle> validAngles = new List<ThingAngle>();
-            if (GetSector(position.X - 1, position.Y) >= 0) validAngles.Add(ThingAngle.West);
-            if (GetSector(position.X + 1, position.Y) >= 0) validAngles.Add(ThingAngle.East);
-            if (GetSector(position.X, position.Y - 1) >= 0) validAngles.Add(ThingAngle.North);
-            if (GetSector(position.X, position.Y + 1) >= 0) validAngles.Add(ThingAngle.South);
-
-            if (validAngles.Count == 0) return DEFAULT_ANGLE;
-            return validAngles[RNG.Next(validAngles.Count)];
-        }
-
-        private Point GetRandomFreeCell()
-        {
-            Point cell;
-
-            do
-            {
-                cell = new Point(RNG.Next(MapWidth), RNG.Next(MapHeight));
-            } while ((Sectors[cell.X * SUBTILE_DIVISIONS, cell.Y * SUBTILE_DIVISIONS] < 0) || Things[cell.X, cell.Y]);
-
-            return cell;
-        }
+        
 
         private void CreateSectors(DoomMap map)
         {
@@ -300,7 +291,7 @@ namespace PixelsOfDoom.Generator
                 {
                     if (Sectors[x, y] != -2) continue; // Cell was already checked
 
-                    if (SubTiles[x, y].TileType == SettingsPixelType.Wall)
+                    if (SubTiles[x, y] == TileType.Wall)
                     {
                         Sectors[x, y] = -1;
                         continue;
@@ -327,7 +318,7 @@ namespace PixelsOfDoom.Generator
                         }
                     }
 
-                    SectorsInfo.Add(new SectorInfo(Settings[SubTiles[x, y].Color], SubTiles[x, y].TileType == SettingsPixelType.Door));
+                    SectorsInfo.Add(new SectorInfo(SubTiles[x, y], Theme, ThemeTextures));
                     map.Sectors.Add(new Sector(SectorsInfo.Last()));
                 }
         }

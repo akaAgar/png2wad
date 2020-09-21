@@ -15,25 +15,22 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using PixelsOfDoom.Config;
-using System;
-
 namespace PixelsOfDoom.Generator
 {
-    public struct SubTile : IEquatable<SubTile>
+    public enum TileType
     {
-        public int Color { get; }
-        public SettingsPixelType TileType { get; }
+        Wall,
+        
+        Room,
+        RoomExterior,
+        RoomSpecialCeiling,
+        RoomSpecialFloor,
 
-        public SubTile(int color, SettingsPixelType tileType = SettingsPixelType.Room)
-        {
-            Color = color;
-            TileType = tileType;
-        }
+        Door,
+        DoorSide,
+        Secret,
 
-        public bool Equals(SubTile other)
-        {
-            return (Color == other.Color) && (TileType == other.TileType);
-        }
+        Entrance,
+        Exit
     }
 }

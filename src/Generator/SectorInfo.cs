@@ -1,49 +1,101 @@
 ﻿using PixelsOfDoom.Config;
+using PixelsOfDoom.Map;
 using System;
 
 namespace PixelsOfDoom.Generator
 {
     public struct SectorInfo
     {
-        public SettingsPixelType SectorType { get; }
+        public TileType Type { get; }
+        public int CeilingHeight { get; private set; }
+        public string CeilingTexture { get; private set; }
+        public int FloorHeight { get; private set; }
+        public string FloorTexture { get; private set; }
+        public int LightLevel { get; private set; }
+        public int LinedefSpecial { get; private set; }
+        public int SectorSpecial { get; private set; }
+        public string WallTexture { get; private set; }
+        public string WallTextureUpper { get; private set; }
+        public string WallTextureLower { get; private set; }
 
-        public int CeilingHeight { get; }
-        public int FloorHeight { get; }
-        public int LineSpecial { get; }
-        public int SectorSpecial { get; }
-
-        public int LightLevel { get; }
-
-        public string CeilingTexture { get; }
-        public string FloorTexture { get; }
-        public string SpecialFlatTexture { get; }
-        public string WallTexture { get; }
-        public string WallTextureAlt { get; }
-        public string WallTextureAlt2 { get; }
-
-
-        public SectorInfo(SettingsPixel pixel, bool sectorIsADoor = false)
+        public SectorInfo(TileType type, PreferencesTheme theme, string[] themeTextures)
         {
-            SectorType = pixel.PixelType;
+            Type = type;
 
-            CeilingHeight = Toolbox.RandomFromArray(pixel.CeilingHeight);
-            FloorHeight = Math.Min(CeilingHeight, Toolbox.RandomFromArray(pixel.FloorHeight));
-            LineSpecial = Math.Max(0, Toolbox.RandomFromArray(pixel.LineSpecial));
-            SectorSpecial = Math.Max(0, Toolbox.RandomFromArray(pixel.SectorSpecial));
+            FloorHeight = theme.Height[(int)ThemeSector.Default][0];
+            CeilingHeight = theme.Height[(int)ThemeSector.Default][1];
+            LinedefSpecial = 0;
+            SectorSpecial = 0;
 
-            LightLevel = Toolbox.Clamp(Toolbox.RandomFromArray(pixel.LightLevel), 0, 255);
+            LightLevel = theme.LightLevel[(int)ThemeSector.Default];
 
-            CeilingTexture = Toolbox.RandomFromArray(pixel.CeilingTexture);
-            FloorTexture = Toolbox.RandomFromArray(pixel.FloorTexture);
-            SpecialFlatTexture = Toolbox.RandomFromArray(pixel.SpecialFlatTexture);
-            WallTexture = Toolbox.RandomFromArray(pixel.WallTexture);
-            WallTextureAlt = Toolbox.RandomFromArray(pixel.WallTextureAlt);
-            WallTextureAlt2 = Toolbox.RandomFromArray(pixel.WallTextureAlt2);
+            CeilingTexture = themeTextures[(int)ThemeTexture.Ceiling];
+            FloorTexture = themeTextures[(int)ThemeTexture.Floor];
+            WallTexture = Toolbox.RandomFromArray(theme.Textures[(int)ThemeTexture.Wall]);
+            WallTextureUpper = null;
+            WallTextureLower = null;
 
-            if (sectorIsADoor)
+            switch (type)
             {
-                CeilingHeight = FloorHeight;
+                case TileType.Door:
+                    CeilingHeight = FloorHeight;
+                    LinedefSpecial = 1; // DR Door Open Wait Close
+                    CeilingTexture = "CRATOP1";
+                    WallTexture = "DOORTRAK";
+                    WallTextureUpper = themeTextures[(int)ThemeTexture.Door];
+                    break;
+
+                case TileType.DoorSide:
+                    WallTexture = themeTextures[(int)ThemeTexture.DoorSide];
+                    break;
+
+                case TileType.Entrance:
+                    ApplySectorSpecial(theme, ThemeSector.Entrance);
+                    FloorTexture = themeTextures[(int)ThemeTexture.FloorEntrance];
+                    break;
+
+                case TileType.Exit:
+                    ApplySectorSpecial(theme, ThemeSector.Exit);
+                    LinedefSpecial = 52; // W1 Exit Level
+                    FloorTexture = themeTextures[(int)ThemeTexture.FloorExit];
+                    break;
+
+                case TileType.RoomExterior:
+                    ApplySectorSpecial(theme, ThemeSector.Exterior);
+                    CeilingTexture = "F_SKY1";
+                    FloorTexture = themeTextures[(int)ThemeTexture.FloorExterior];
+                    break;
+
+                case TileType.RoomSpecialCeiling:
+                    ApplySectorSpecial(theme, ThemeSector.SpecialCeiling);
+                    CeilingTexture = themeTextures[(int)ThemeTexture.CeilingSpecial];
+                    break;
+
+                case TileType.RoomSpecialFloor:
+                    ApplySectorSpecial(theme, ThemeSector.SpecialFloor);
+                    FloorTexture = themeTextures[(int)ThemeTexture.FloorSpecial];
+                    break;
+
+                case TileType.Secret:
+                    CeilingHeight = FloorHeight;
+                    LinedefSpecial = 31; // D1 Door Open Stay
+                    SectorSpecial = 9; // Secret room
+                    WallTexture = "DOORTRAK";
+                    break;
             }
+
+            CeilingHeight = Math.Max(FloorHeight, CeilingHeight);
+
+            WallTextureUpper = WallTextureUpper ?? WallTexture;
+            WallTextureLower = WallTextureLower ?? WallTexture;
+        }
+
+        private void ApplySectorSpecial(PreferencesTheme theme, ThemeSector themeSector)
+        {
+            CeilingHeight = theme.Height[(int)themeSector][1];
+            FloorHeight = theme.Height[(int)themeSector][0];
+            LightLevel = theme.LightLevel[(int)themeSector];
+            SectorSpecial = theme.SectorSpecial[(int)themeSector];
         }
     }
 }
