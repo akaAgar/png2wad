@@ -65,8 +65,10 @@ namespace PixelsOfDoom
                 if ((config.Doom1Format && (mapNumber > 9)) || (!config.Doom1Format && (mapNumber > 99))) // Too many maps, stop here
                     break;
 
+#if !DEBUG
                 try
                 {
+#endif
                     string mapName = config.Doom1Format ? $"E{config.Episode:0}M{mapNumber:0}" : $"MAP{mapNumber:00}";
 
                     using (Bitmap bitmap = (Bitmap)Image.FromFile(mapBitmapFiles[i]))
@@ -76,11 +78,16 @@ namespace PixelsOfDoom
                             map.AddToWad(wad);
                         }
                     }
+#if !DEBUG
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine();
                     continue;
                 }
+#endif
             }
 
             wad.SaveToFile(wadFile);
@@ -109,6 +116,12 @@ namespace PixelsOfDoom
                         break;
                 }
             }
+
+#if DEBUG
+            Console.WriteLine();
+            Console.WriteLine("Press any key");
+            Console.ReadKey();
+#endif
         }
 
         /// <summary>
