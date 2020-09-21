@@ -243,7 +243,7 @@ namespace PixelsOfDoom.Generator
 
             map.Sectors.Clear();
 
-            int[,] subTiles = new int[MapSubWidth, MapSubHeight];
+            SubTile[,] subTiles = new SubTile[MapSubWidth, MapSubHeight];
             for (x = 0; x < MapWidth; x++)
                 for (y = 0; y < MapHeight; y++)
                 {
@@ -251,7 +251,26 @@ namespace PixelsOfDoom.Generator
 
                     for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
                         for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)
-                            subTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = color;
+                        {
+                            SettingsPixelType type = Settings[color].PixelType;
+
+                            if (type == SettingsPixelType.Door)
+                            {
+                                type = SettingsPixelType.Room;
+
+                                if ((x > 0) && (x < MapWidth - 1) &&
+                                    (Settings[bitmap.GetPixel(x - 1, y)].PixelType == SettingsPixelType.Wall) && (Settings[bitmap.GetPixel(x + 1, y)].PixelType == SettingsPixelType.Wall))
+                                {
+                                    if ((sY == 3) || (sY == 4)) type = SettingsPixelType.Door;
+                                }
+                                else
+                                {
+                                    if ((sX == 3) || (sX == 4)) type = SettingsPixelType.Door;
+                                }
+                            }
+
+                            subTiles[x * SUBTILE_DIVISIONS + sX, y * SUBTILE_DIVISIONS + sY] = new SubTile(color, type);
+                        }
                 }
 
 
@@ -260,8 +279,14 @@ namespace PixelsOfDoom.Generator
                 {
                     if (Sectors[x, y] != -2) continue; // Cell was already checked
 
-                    color = subTiles[x, y];
-                    if (Settings[color].PixelType == SettingsPixelType.Wall)
+                    //color = subTiles[x, y];
+                    //if (Settings[color].PixelType == SettingsPixelType.Wall)
+                    //{
+                    //    Sectors[x, y] = -1;
+                    //    continue;
+                    //}
+
+                    if (subTiles[x, y].TileType == SettingsPixelType.Wall)
                     {
                         Sectors[x, y] = -1;
                         continue;
@@ -277,7 +302,8 @@ namespace PixelsOfDoom.Generator
 
                         if (a.X < MapSubWidth && a.X > 0 && a.Y < MapSubHeight && a.Y > 0)
                         {
-                            if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y] == color))
+                            //if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y] == color))
+                            if ((Sectors[a.X, a.Y] == -2) && (subTiles[a.X, a.Y].Equals(subTiles[x, y])))
                             {
                                 Sectors[a.X, a.Y] = SectorsInfo.Count;
                                 pixels.Push(new Point(a.X - 1, a.Y));
@@ -288,7 +314,8 @@ namespace PixelsOfDoom.Generator
                         }
                     }
 
-                    SectorsInfo.Add(new SectorInfo(Settings[color]));
+                    //SectorsInfo.Add(new SectorInfo(Settings[color]));
+                    SectorsInfo.Add(new SectorInfo(Settings[subTiles[x, y].Color]));
                     map.Sectors.Add(new Sector(SectorsInfo.Last()));
                 }
         }
