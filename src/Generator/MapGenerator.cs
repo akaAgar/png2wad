@@ -167,6 +167,10 @@ namespace PixelsOfDoom.Generator
             bool flipVectors = false;
             Point vertexOffset = Point.Empty;
             Point neighborOffset = GetDirectionOffset(neighborDirection);
+            Point neighborPosition = position.Add(neighborOffset);
+
+            bool isADoor = (GetSubTile(position).TileType == SettingsPixelType.Door) || (GetSubTile(neighborPosition).TileType == SettingsPixelType.Door);
+            bool needsFlipping = GetSubTile(position).TileType == SettingsPixelType.Door;
 
             switch (neighborDirection)
             {
@@ -190,10 +194,11 @@ namespace PixelsOfDoom.Generator
             do
             {
                 position = position.Add(direction);
+                neighborPosition = position.Add(neighborOffset);
                 length++;
 
 
-                if ((GetSector(position) != sector) || (GetSector(position.Add(neighborOffset)) != neighborSector)) break;
+                if ((GetSector(position) != sector) || (GetSector(neighborPosition) != neighborSector)) break;
             } while (true);
 
             int v2 = map.AddVertex(position.Add(vertexOffset).Mult(VERTEX_POSITION_MULTIPLIER));
@@ -207,9 +212,15 @@ namespace PixelsOfDoom.Generator
             }
             else
             {
+                int lineSpecial = isADoor ? 1 : 0;
+
                 map.Sidedefs.Add(new Sidedef(neighborSector, SectorsInfo[neighborSector], SectorsInfo[sector]));
                 map.Sidedefs.Add(new Sidedef(sector, SectorsInfo[sector], SectorsInfo[neighborSector]));
-                map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.TwoSided, 0, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
+
+                if (needsFlipping)
+                    map.Linedefs.Add(new Linedef(v2, v1, LinedefFlags.TwoSided, lineSpecial, 0, map.Sidedefs.Count - 1, map.Sidedefs.Count - 2));
+                else
+                    map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.TwoSided, lineSpecial, 0, map.Sidedefs.Count - 2, map.Sidedefs.Count - 1));
             }
 
             return length;
@@ -222,6 +233,15 @@ namespace PixelsOfDoom.Generator
                 return -1;
 
             return Sectors[x, y];
+        }
+
+        private SubTile GetSubTile(Point position) { return GetSubTile(position.X, position.Y); }
+        private SubTile GetSubTile(int x, int y)
+        {
+            if ((x < 0) || (y < 0) || (x >= MapSubWidth) || (y >= MapSubHeight))
+                return new SubTile(Settings.WALL_COLOR, SettingsPixelType.Wall);
+
+            return SubTiles[x, y];
         }
 
         private bool IsSubPointOnMap(Point position)
