@@ -35,15 +35,5 @@ namespace PixelsOfDoom.Generator
         {
             return (Color == other.Color) && (TileType == other.TileType);
         }
-
-        //public static bool operator ==(SubTile other)
-        //{
-        //    return Equals(other);
-        //}
-
-        //public static bool operator !=(SubTile other)
-        //{
-        //    return !Equals(other);
-        //}
     }
 }
