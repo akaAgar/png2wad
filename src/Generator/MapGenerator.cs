@@ -62,7 +62,7 @@ namespace PixelsOfDoom.Generator
             CreateSectors(map);
             CreateLines(map);
 
-            using (ThingsMaker thingsMaker = new ThingsMaker(Theme))
+            using (ThingsMaker thingsMaker = new ThingsMaker(Preferences, Theme))
             {
                 thingsMaker.CreateThings(map, SubTiles);
             }
@@ -109,6 +109,12 @@ namespace PixelsOfDoom.Generator
                 for (y = 0; y < bitmap.Height; y++)
                 {
                     tileType = GetTileTypeFromPixel(bitmap.GetPixel(x, y));
+
+                    if (!Preferences.GenerateEntranceAndExit) // Entrance and exit generation disabled, do not create entrance/exit tiles
+                    {
+                        if ((tileType == TileType.Entrance) || (tileType == TileType.Exit))
+                            tileType = TileType.Room;
+                    }
 
                     for (sX = 0; sX < SUBTILE_DIVISIONS; sX++)
                         for (sY = 0; sY < SUBTILE_DIVISIONS; sY++)

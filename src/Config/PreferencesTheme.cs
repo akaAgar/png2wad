@@ -24,13 +24,11 @@ namespace PixelsOfDoom.Config
     {
         public static readonly int THEME_SECTORS_COUNT = Enum.GetValues(typeof(ThemeSector)).Length;
         public static readonly int THEME_TEXTURES_COUNT = Enum.GetValues(typeof(ThemeTexture)).Length;
-        public static readonly int THEME_THINGS_COUNT = Enum.GetValues(typeof(ThemeThing)).Length;
 
         public int[][] Height { get; }
         public int[] LightLevel { get; }
         public int[] SectorSpecial { get; }
         public string[][] Textures { get; }
-        public int[][] Things { get; }
 
         public PreferencesTheme(INIFile ini, string section)
         {
@@ -57,10 +55,6 @@ namespace PixelsOfDoom.Config
             Textures = new string[THEME_TEXTURES_COUNT][];
             for (i = 0; i < THEME_TEXTURES_COUNT; i++)
                 Textures[i] = ini.GetValueArray<string>(section, $"Textures.{(ThemeTexture)i}");
-
-            Things = new int[THEME_THINGS_COUNT][];
-            for (i = 0; i < THEME_THINGS_COUNT; i++)
-                Things[i] = ini.GetValueArray<int>(section, $"Things.{(ThemeThing)i}");
         }
     }
 }

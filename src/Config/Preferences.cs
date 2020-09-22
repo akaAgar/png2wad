@@ -24,13 +24,17 @@ namespace PixelsOfDoom.Config
 {
     public struct Preferences
     {
+        public static readonly int PREFERENCES_THINGS_COUNT = Enum.GetValues(typeof(ThingCategory)).Length;
         private static readonly int DEFAULT_COLOR = Color.Black.ToArgb();
 
         public bool BuildNodes { get; }
         public bool Doom1Format { get; }
         public int Episode { get; }
+        public bool GenerateEntranceAndExit { get; }
+        public bool GenerateThings { get; }
 
         private readonly Dictionary<int, PreferencesTheme> Themes;
+        public int[][] Things { get; }
 
         public Preferences(string filePath)
         {
@@ -40,6 +44,12 @@ namespace PixelsOfDoom.Config
                 BuildNodes = ini.GetValue("Options", "BuildNodes", false);
                 Doom1Format = ini.GetValue("Options", "Doom1Format", false);
                 Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Episode", 1)));
+                GenerateEntranceAndExit = ini.GetValue("Options", "GenerateEntranceAndExit", true);
+                GenerateThings = ini.GetValue("Options", "GenerateThings", true);
+
+                Things = new int[PREFERENCES_THINGS_COUNT][];
+                for (int i = 0; i < PREFERENCES_THINGS_COUNT; i++)
+                    Things[i] = ini.GetValueArray<int>("Things", ((ThingCategory)i).ToString());
 
                 Themes = new Dictionary<int, PreferencesTheme>
                 {

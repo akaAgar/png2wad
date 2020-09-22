@@ -17,7 +17,7 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 
 namespace PixelsOfDoom.Config
 {
-    public enum ThemeThing
+    public enum ThingCategory
     {
         AmmoLarge,
         AmmoSmall,

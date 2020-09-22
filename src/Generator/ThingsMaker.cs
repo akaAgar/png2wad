@@ -13,13 +13,17 @@ namespace PixelsOfDoom.Generator
         /// </summary>
         private const int DEFAULT_ANGLE = 90;
 
+        private readonly Preferences Preferences;
         private readonly PreferencesTheme Theme;
+
         private readonly List<Point> FreeTiles;
         private float MapSizeMultiplier;
 
-        public ThingsMaker(PreferencesTheme theme)
+        public ThingsMaker(Preferences preferences, PreferencesTheme theme)
         {
+            Preferences = preferences;
             Theme = theme;
+
             FreeTiles = new List<Point>();
         }
 
@@ -47,42 +51,46 @@ namespace PixelsOfDoom.Generator
 
             MapSizeMultiplier = FreeTiles.Count / 1000.0f;
 
-            AddPlayerStart(map, subTiles);
+            if (Preferences.GenerateEntranceAndExit)
+                AddPlayerStart(map, subTiles);
 
-            AddThingCategory(map, ThemeThing.MonstersVeryHard);
-            AddThingCategory(map, ThemeThing.MonstersHard);
-            AddThingCategory(map, ThemeThing.MonstersAverage);
-            AddThingCategory(map, ThemeThing.MonstersEasy);
+            if (Preferences.GenerateThings)
+            {
+                AddThingCategory(map, ThingCategory.MonstersVeryHard);
+                AddThingCategory(map, ThingCategory.MonstersHard);
+                AddThingCategory(map, ThingCategory.MonstersAverage);
+                AddThingCategory(map, ThingCategory.MonstersEasy);
 
-            AddThingCategory(map, ThemeThing.PowerUps);
+                AddThingCategory(map, ThingCategory.PowerUps);
 
-            AddThingCategory(map, ThemeThing.WeaponsHigh);
-            AddThingCategory(map, ThemeThing.WeaponsLow);
+                AddThingCategory(map, ThingCategory.WeaponsHigh);
+                AddThingCategory(map, ThingCategory.WeaponsLow);
 
-            AddThingCategory(map, ThemeThing.Health);
+                AddThingCategory(map, ThingCategory.Health);
 
-            AddThingCategory(map, ThemeThing.AmmoLarge);
-            AddThingCategory(map, ThemeThing.AmmoSmall);
-            AddThingCategory(map, ThemeThing.Armor);
+                AddThingCategory(map, ThingCategory.AmmoLarge);
+                AddThingCategory(map, ThingCategory.AmmoSmall);
+                AddThingCategory(map, ThingCategory.Armor);
+            }
         }
 
-        private void AddThingCategory(DoomMap map, ThemeThing thingCategory)
+        private void AddThingCategory(DoomMap map, ThingCategory thingCategory)
         {
             int count = 0;
             int chance = 100;
             switch (thingCategory)
             {
-                case ThemeThing.AmmoLarge: count = Toolbox.RandomInt(4, 9); break;
-                case ThemeThing.AmmoSmall: count = Toolbox.RandomInt(8, 13); break;
-                case ThemeThing.Armor: count = Toolbox.RandomInt(2, 5); break;
-                case ThemeThing.Health: count = Toolbox.RandomInt(8, 11); break;
-                case ThemeThing.PowerUps: count = Toolbox.RandomInt(0, 3);break;
-                case ThemeThing.WeaponsHigh: count = Toolbox.RandomInt(1, 3); break;
-                case ThemeThing.WeaponsLow: count = Toolbox.RandomInt(2, 4); break;
-                case ThemeThing.MonstersEasy: count = Toolbox.RandomInt(20, 31); break;
-                case ThemeThing.MonstersAverage: count = Toolbox.RandomInt(20, 31); break;
-                case ThemeThing.MonstersHard: count = Toolbox.RandomInt(5, 11); break;
-                case ThemeThing.MonstersVeryHard: count = Toolbox.RandomInt(2, 6); break;
+                case ThingCategory.AmmoLarge: count = Toolbox.RandomInt(4, 9); break;
+                case ThingCategory.AmmoSmall: count = Toolbox.RandomInt(8, 13); break;
+                case ThingCategory.Armor: count = Toolbox.RandomInt(2, 5); break;
+                case ThingCategory.Health: count = Toolbox.RandomInt(8, 11); break;
+                case ThingCategory.PowerUps: count = Toolbox.RandomInt(0, 3);break;
+                case ThingCategory.WeaponsHigh: count = Toolbox.RandomInt(1, 3); break;
+                case ThingCategory.WeaponsLow: count = Toolbox.RandomInt(2, 4); break;
+                case ThingCategory.MonstersEasy: count = Toolbox.RandomInt(20, 31); break;
+                case ThingCategory.MonstersAverage: count = Toolbox.RandomInt(20, 31); break;
+                case ThingCategory.MonstersHard: count = Toolbox.RandomInt(5, 11); break;
+                case ThingCategory.MonstersVeryHard: count = Toolbox.RandomInt(2, 6); break;
             }
 
             if (Toolbox.RandomInt(100) >= chance) return;
@@ -90,13 +98,13 @@ namespace PixelsOfDoom.Generator
             count = (int)(count * MapSizeMultiplier);
 
             if (count <= 0) return;
-            if (Theme.Things[(int)thingCategory].Length == 0) return;
+            if (Preferences.Things[(int)thingCategory].Length == 0) return;
 
             for (int i = 0; i < count; i++)
             {
                 if (FreeTiles.Count == 0) return;
 
-                int thingType = Toolbox.RandomFromArray(Theme.Things[(int)thingCategory]);
+                int thingType = Toolbox.RandomFromArray(Preferences.Things[(int)thingCategory]);
                 Point pt = Toolbox.RandomFromList(FreeTiles);
                 AddThing(map, pt.X, pt.Y, thingType);
                 FreeTiles.Remove(pt);
@@ -116,6 +124,18 @@ namespace PixelsOfDoom.Generator
                         return;
                     }
                 }
+
+            // No "entrance" tile found, put player start in a random free tile
+            if (FreeTiles.Count > 0)
+            {
+                Point pt = Toolbox.RandomFromList(FreeTiles);
+                FreeTiles.Remove(pt);
+                AddThing(map, pt.X, pt.Y, 1);
+                return;
+            }
+
+            // No free spot, put player start in tile 0,0
+            AddThing(map, 0, 0, 1);
         }
 
         private void AddThing(DoomMap map, int x, int y, int thingType, int angle = (int)DEFAULT_ANGLE)

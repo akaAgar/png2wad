@@ -40,7 +40,7 @@
   <ItemGroup>
     <Compile Include="Config\PreferencesTheme.cs" />
     <Compile Include="Config\ThemeSector.cs" />
-    <Compile Include="Config\ThemeThing.cs" />
+    <Compile Include="Config\ThingCategory.cs" />
     <Compile Include="Config\ThemeTexture.cs" />
     <Compile Include="Generator\SectorInfo.cs" />
     <Compile Include="Generator\ThingsMaker.cs" />
