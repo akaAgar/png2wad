@@ -8,7 +8,10 @@ namespace PixelsOfDoom.Generator
 {
     public sealed class ThingsMaker : IDisposable
     {
-        private const ThingAngle DEFAULT_ANGLE = ThingAngle.North;
+        /// <summary>
+        /// Default angle is North.
+        /// </summary>
+        private const int DEFAULT_ANGLE = 90;
 
         private readonly PreferencesTheme Theme;
         private readonly List<Point> FreeTiles;
@@ -20,7 +23,7 @@ namespace PixelsOfDoom.Generator
             FreeTiles = new List<Point>();
         }
 
-        public void CreateThings(DoomMap map, TileType[,] subTiles, int depth)
+        public void CreateThings(DoomMap map, TileType[,] subTiles)
         {
             int x, y;
 
@@ -46,24 +49,24 @@ namespace PixelsOfDoom.Generator
 
             AddPlayerStart(map, subTiles);
 
-            AddThingCategory(map, ThemeThing.MonstersVeryHard, depth);
-            AddThingCategory(map, ThemeThing.MonstersHard, depth);
-            AddThingCategory(map, ThemeThing.MonstersAverage, depth);
-            AddThingCategory(map, ThemeThing.MonstersEasy, depth);
+            AddThingCategory(map, ThemeThing.MonstersVeryHard);
+            AddThingCategory(map, ThemeThing.MonstersHard);
+            AddThingCategory(map, ThemeThing.MonstersAverage);
+            AddThingCategory(map, ThemeThing.MonstersEasy);
 
-            AddThingCategory(map, ThemeThing.PowerUps, depth);
+            AddThingCategory(map, ThemeThing.PowerUps);
 
-            AddThingCategory(map, ThemeThing.WeaponsHigh, depth);
-            AddThingCategory(map, ThemeThing.WeaponsLow, depth);
+            AddThingCategory(map, ThemeThing.WeaponsHigh);
+            AddThingCategory(map, ThemeThing.WeaponsLow);
 
-            AddThingCategory(map, ThemeThing.Health, depth);
+            AddThingCategory(map, ThemeThing.Health);
 
-            AddThingCategory(map, ThemeThing.AmmoLarge, depth);
-            AddThingCategory(map, ThemeThing.AmmoSmall, depth);
-            AddThingCategory(map, ThemeThing.Armor, depth);
+            AddThingCategory(map, ThemeThing.AmmoLarge);
+            AddThingCategory(map, ThemeThing.AmmoSmall);
+            AddThingCategory(map, ThemeThing.Armor);
         }
 
-        private void AddThingCategory(DoomMap map, ThemeThing thingCategory, int depth)
+        private void AddThingCategory(DoomMap map, ThemeThing thingCategory)
         {
             int count = 0;
             int chance = 100;
@@ -73,13 +76,13 @@ namespace PixelsOfDoom.Generator
                 case ThemeThing.AmmoSmall: count = Toolbox.RandomInt(8, 13); break;
                 case ThemeThing.Armor: count = Toolbox.RandomInt(2, 5); break;
                 case ThemeThing.Health: count = Toolbox.RandomInt(8, 11); break;
-                case ThemeThing.PowerUps: count = Toolbox.RandomInt(0, 3); chance = 70 + depth * 5; break;
-                case ThemeThing.WeaponsHigh: count = Toolbox.RandomInt(1, 3); chance = 20 * depth; break;
+                case ThemeThing.PowerUps: count = Toolbox.RandomInt(0, 3);break;
+                case ThemeThing.WeaponsHigh: count = Toolbox.RandomInt(1, 3); break;
                 case ThemeThing.WeaponsLow: count = Toolbox.RandomInt(2, 4); break;
                 case ThemeThing.MonstersEasy: count = Toolbox.RandomInt(20, 31); break;
-                case ThemeThing.MonstersAverage: count = Toolbox.RandomInt(20 + Math.Min(depth, 9), 31 + Math.Min(depth, 9)); break;
-                case ThemeThing.MonstersHard: count = Toolbox.RandomInt(Math.Min(depth * 2, 9), 10 + Math.Min(depth * 4, 16)); break;
-                case ThemeThing.MonstersVeryHard: count = Toolbox.RandomInt(Math.Min(depth, 9), Math.Min(depth * 2, 9)); chance = 25 * depth; break;
+                case ThemeThing.MonstersAverage: count = Toolbox.RandomInt(20, 31); break;
+                case ThemeThing.MonstersHard: count = Toolbox.RandomInt(5, 11); break;
+                case ThemeThing.MonstersVeryHard: count = Toolbox.RandomInt(2, 6); break;
             }
 
             if (Toolbox.RandomInt(100) >= chance) return;
@@ -121,7 +124,7 @@ namespace PixelsOfDoom.Generator
                 new Thing(
                     (int)((x + .5f) * MapGenerator.TILE_SIZE),
                     (int)((y + .5f) * -MapGenerator.TILE_SIZE),
-                    angle, thingType, ThingOptions.AllSkills));
+                    thingType, angle, ThingOptions.AllSkills));
         }
 
         public void Dispose()

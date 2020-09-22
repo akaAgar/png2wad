@@ -51,7 +51,7 @@ namespace PixelsOfDoom.Generator
             Preferences = preferences;
         }
 
-        public DoomMap Generate(string name, Bitmap bitmap, int depth)
+        public DoomMap Generate(string name, Bitmap bitmap)
         {
             if (bitmap == null) return null;
             
@@ -64,7 +64,7 @@ namespace PixelsOfDoom.Generator
 
             using (ThingsMaker thingsMaker = new ThingsMaker(Theme))
             {
-                thingsMaker.CreateThings(map, SubTiles, depth);
+                thingsMaker.CreateThings(map, SubTiles);
             }
 
             return map;
@@ -236,7 +236,7 @@ namespace PixelsOfDoom.Generator
 
             if (neighborSector < 0) // neighbor is a wall, create an impassible linedef
             {
-                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", SectorsInfo[sector].WallTexture, sector));
+                map.Sidedefs.Add(new Sidedef("-", "-", SectorsInfo[sector].WallTexture, sector));
                 map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible | LinedefFlags.LowerUnpegged, 0, 0, -1, map.Sidedefs.Count - 1));
             }
             else // neighbor is another sector, create a two-sided linedef
