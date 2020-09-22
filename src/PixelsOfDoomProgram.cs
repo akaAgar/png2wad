@@ -40,7 +40,7 @@ namespace PixelsOfDoom
         {
 #if DEBUG
             if (args.Length == 0)
-                args = new string[] { @"..\Release\wolf3d_e1m1.png", @"..\Release\cave.png" };
+                args = new string[] { @"..\Release\wolf3d.png", @"..\Release\cave.png", @"..\Release\city_of_hell.png" };
 #endif
 
             using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
