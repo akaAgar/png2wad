@@ -20,15 +20,45 @@ using System.Collections.Generic;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map thing.
+    /// </summary>
     public struct Thing
     {
+        /// <summary>
+        /// X-coordinate of this thing.
+        /// </summary>
         public int X { get; }
+
+        /// <summary>
+        /// Y-coordinate of this thing.
+        /// </summary>
         public int Y { get; }
+
+        /// <summary>
+        /// Direction this thing is facing (east is 0, north is 90, west is 180, south is 270)
+        /// </summary>
         public int Angle { get; }
+        
+        /// <summary>
+        /// Type of thing.
+        /// </summary>
         public int Type { get; }
+        
+        /// <summary>
+        /// Thing options.
+        /// </summary>
         public ThingOptions Options { get; }
 
-        public Thing(int x, int y, int angle, int type, ThingOptions options)
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="x">X-coordinate of this thing</param>
+        /// <param name="y">Y-coordinate of this thing</param>
+        /// <param name="type">Type of thing</param>
+        /// <param name="angle">Direction this thing is facing (east is 0, north is 90, west is 180, south is 270)</param>
+        /// <param name="options">Thing options</param>
+        public Thing(int x, int y, int type, int angle = 0, ThingOptions options = ThingOptions.AllSkills)
         {
             X = x;
             Y = y;
@@ -37,6 +67,10 @@ namespace PixelsOfDoom.Map
             Options = options;
         }
 
+        /// <summary>
+        /// Gets an array of bytes descripting this thing to add to the THINGS lump.
+        /// </summary>
+        /// <returns>An array of bytes</returns>
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

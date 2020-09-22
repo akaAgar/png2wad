@@ -22,16 +22,50 @@ using System.Collections.Generic;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map sector.
+    /// </summary>
     public struct Sector
     {
+        /// <summary>
+        /// Height of this sector's floor.
+        /// </summary>
         public int FloorHeight { get; }
+
+        /// <summary>
+        /// Height of this sector's ceiling.
+        /// </summary>
         public int CeilingHeight { get; }
+
+        /// <summary>
+        /// Texture drawn on this sector's floor.
+        /// </summary>
         public string FloorTexture { get; }
+
+        /// <summary>
+        /// Texture drawn on this sector's ceiling.
+        /// </summary>
         public string CeilingTexture { get; }
+        
+        /// <summary>
+        /// Light level in this sector (0-255).
+        /// </summary>
         public int LightLevel { get; }
+        
+        /// <summary>
+        /// Sector special type.
+        /// </summary>
         public int Special { get; }
+        
+        /// <summary>
+        /// Sector special tag.
+        /// </summary>
         public int Tag { get; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="info">Sector info from which to create this sector.</param>
         public Sector(SectorInfo info)
         {
             FloorHeight = info.FloorHeight;
@@ -43,17 +77,10 @@ namespace PixelsOfDoom.Map
             Tag = 0;
         }
 
-        public Sector(int floorHeight, int ceilingHeight, string floorTexture, string ceilingTexture, int lightLevel, int special, int tag)
-        {
-            FloorHeight = floorHeight;
-            CeilingHeight = ceilingHeight;
-            FloorTexture = floorTexture;
-            CeilingTexture = ceilingTexture;
-            LightLevel = lightLevel;
-            Special = special;
-            Tag = tag;
-        }
-
+        /// <summary>
+        /// Gets an array of bytes descripting this sector to add to the SECTORS lump.
+        /// </summary>
+        /// <returns>An array of bytes</returns>
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

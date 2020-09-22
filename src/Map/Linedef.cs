@@ -20,16 +20,56 @@ using System.Collections.Generic;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map linedef.
+    /// </summary>
     public struct Linedef
     {
+        /// <summary>
+        /// Index of this linedef's first vertex.
+        /// </summary>
         public int Vertex1 { get; }
+
+        /// <summary>
+        /// Index of this linedef's second vertex.
+        /// </summary>
         public int Vertex2 { get; }
+        
+        /// <summary>
+        /// Linedef flags.
+        /// </summary>
         public LinedefFlags Flags { get; }
+        
+        /// <summary>
+        /// Linedef special type.
+        /// </summary>
         public int Type { get; }
+        
+        /// <summary>
+        /// Linedef action tag.
+        /// </summary>
         public int Tag { get; }
+        
+        /// <summary>
+        /// Index of this sidedef's right sidedef.
+        /// </summary>
         public int SidedefRight { get; }
+
+        /// <summary>
+        /// Index of this sidedef's left sidedef.
+        /// </summary>
         public int SidedefLeft { get; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="vertex1">Index of this linedef's first vertex</param>
+        /// <param name="vertex2">Index of this linedef's second vertex</param>
+        /// <param name="flags">Linedef flags</param>
+        /// <param name="type">Linedef special type</param>
+        /// <param name="tag">Linedef action tag</param>
+        /// <param name="sidedefLeft">Index of this sidedef's right sidedef</param>
+        /// <param name="sidedefRight">Index of this sidedef's left sidedef</param>
         public Linedef(int vertex1, int vertex2, LinedefFlags flags, int type, int tag, int sidedefLeft, int sidedefRight)
         {
             Vertex1 = vertex1;
@@ -41,6 +81,10 @@ namespace PixelsOfDoom.Map
             SidedefLeft = sidedefLeft;
         }
 
+        /// <summary>
+        /// Gets an array of bytes descripting this linedef to add to the LINEDEFS lump.
+        /// </summary>
+        /// <returns>An array of bytes</returns>
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

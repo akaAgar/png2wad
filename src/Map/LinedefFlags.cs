@@ -19,17 +19,47 @@ using System;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// Special flags for a Doom map linedef.
+    /// </summary>
     [Flags]
     public enum LinedefFlags
     {
+        /// <summary>
+        /// Cannot be crossed.
+        /// </summary>
         Impassible = 1,
+        /// <summary>
+        /// Blocks monsters.
+        /// </summary>
         BlocksMonsters = 2,
+        /// <summary>
+        /// Has two sides.
+        /// </summary>
         TwoSided = 4,
+        /// <summary>
+        /// Draw lower texture from the bottom.
+        /// </summary>
         UpperUnpegged = 8,
+        /// <summary>
+        /// Draw upper texture from the top.
+        /// </summary>
         LowerUnpegged = 16,
+        /// <summary>
+        /// Show as a wall on the automap, used to hide secret passages.
+        /// </summary>
         Secret = 32,
+        /// <summary>
+        /// Sound can only cross one linedef with this flag (not two).
+        /// </summary>
         BlocksSound = 64,
+        /// <summary>
+        /// Does not appear on the automap.
+        /// </summary>
         NotOnMap = 128,
+        /// <summary>
+        /// Drawn on the automap at the beginning of the level.
+        /// </summary>
         AlreadyOnMap = 126
     }
 }

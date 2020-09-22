@@ -22,6 +22,9 @@ using System.Text;
 
 namespace PixelsOfDoom.Wad
 {
+    /// <summary>
+    /// A Doom wad file.
+    /// </summary>
     public sealed class WadFile : IDisposable
     {
         /// <summary>

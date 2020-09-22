@@ -23,21 +23,54 @@ using System.Linq;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map.
+    /// </summary>
     public sealed class DoomMap : IDisposable
     {
+        /// <summary>
+        /// Name of the map in the wad file (E1M1, MAP01, etc.)
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Map linedefs.
+        /// </summary>
         public List<Linedef> Linedefs { get; } = new List<Linedef>();
+        
+        /// <summary>
+        /// Map sectors.
+        /// </summary>
         public List<Sector> Sectors { get; } = new List<Sector>();
+        
+        /// <summary>
+        /// Map sidedefs.
+        /// </summary>
         public List<Sidedef> Sidedefs { get; } = new List<Sidedef>();
+        
+        /// <summary>
+        /// Map things.
+        /// </summary>
         public List<Thing> Things { get; } = new List<Thing>();
-        private List<Vertex> Vertices { get; } = new List<Vertex>();
+        
+        /// <summary>
+        /// Map vertices.
+        /// </summary>
+        public List<Vertex> Vertices { get; } = new List<Vertex>();
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="name">Name of the map in the wad file (E1M1, MAP01...)</param>
         public DoomMap(string name)
         {
             Name = name;
         }
 
+        /// <summary>
+        /// Adds the map lumps to a Doom wad file.
+        /// </summary>
+        /// <param name="wad">The wad file to which the map should be added</param>
         public void AddToWad(WadFile wad)
         {
             wad.AddLump(Name, new byte[0]);
@@ -48,20 +81,24 @@ namespace PixelsOfDoom.Map
             wad.AddLump("VERTEXES", Vertices.SelectMany(x => x.ToBytes()).ToArray());
         }
 
-        public int AddVertex(int x, int y) { return AddVertex(new Point(x, y)); }
-        public int AddVertex(Point pt)
+        /// <summary>
+        /// Adds a new vertex to the map if no vertex with these coordinates exist, or return the index of the vertex with these coordinates.
+        /// </summary>
+        /// <param name="coordinates">Coordinates of the vertex</param>
+        /// <returns>Index of the vertex with these coordinates</returns>
+        public int AddVertex(Point coordinates)
         {
             for (int i = 0; i < Vertices.Count; i++)
-                if ((Vertices[i].X == pt.X) && (Vertices[i].Y == pt.Y))
+                if ((Vertices[i].X == coordinates.X) && (Vertices[i].Y == coordinates.Y))
                     return i;
 
-            Vertices.Add(new Vertex(pt));
+            Vertices.Add(new Vertex(coordinates));
             return Vertices.Count - 1;
         }
 
-        public void Dispose()
-        {
-
-        }
+        /// <summary>
+        /// IDisposable implementation.
+        /// </summary>
+        public void Dispose() { }
     }
 }

@@ -22,25 +22,64 @@ using System.Collections.Generic;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map sidedef.
+    /// </summary>
     public struct Sidedef
     {
+        /// <summary>
+        /// Texture X-Offset.
+        /// </summary>
 		public int XOffset { get; }
-		public int YOffset { get; }
-		public string UpperTexture { get; }
-		public string LowerTexture { get; }
-		public string MiddleTexture { get; }
-		public int Sector { get; }
+		
+        /// <summary>
+        /// Texture Y-Offset.
+        /// </summary>
+        public int YOffset { get; }
 
-        public Sidedef(int xOffset, int yOffset, string upperTexture, string lowerTexture, string middleTexture, int sector)
+        /// <summary>
+        /// Upper (above neighboring sector) texture.
+        /// </summary>
+        public string UpperTexture { get; }
+
+        /// <summary>
+        /// Lower (below neighboring sector) texture.
+        /// </summary>
+        public string LowerTexture { get; }
+
+        /// <summary>
+        /// Middle (over neighboring sector, or wall) texture.
+        /// </summary>
+        public string MiddleTexture { get; }
+		
+        /// <summary>
+        /// Sector this sidedef faces.
+        /// </summary>
+        public int Sector { get; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="upperTexture">Upper (above neighboring sector) texture</param>
+        /// <param name="lowerTexture">Lower (below neighboring sector) texture</param>
+        /// <param name="middleTexture">Middle (over neighboring sector, or wall) texture</param>
+        /// <param name="sector">Sector this sidedef faces</param>
+        public Sidedef(string upperTexture, string lowerTexture, string middleTexture, int sector)
         {
-            XOffset = xOffset;
-            YOffset = yOffset;
+            XOffset = 0;
+            YOffset = 0;
             UpperTexture = upperTexture;
             LowerTexture = lowerTexture;
             MiddleTexture = middleTexture;
             Sector = sector;
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="sectorID">Sector this sidedef faces</param>
+        /// <param name="sector">Info about the sector this sidedef faces</param>
+        /// <param name="neighborSector">Info about the sector this sidedef's opposing sector</param>
         public Sidedef(int sectorID, SectorInfo sector, SectorInfo neighborSector)
         {
             XOffset = 0; YOffset = 0;
@@ -60,6 +99,10 @@ namespace PixelsOfDoom.Map
             Sector = sectorID;
         }
 
+        /// <summary>
+        /// Gets an array of bytes descripting this sidedef to add to the SIDEDEFS lump.
+        /// </summary>
+        /// <returns>An array of bytes</returns>
         public byte[] ToBytes()
 		{
 			List<byte> bytes = new List<byte>();

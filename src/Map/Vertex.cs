@@ -21,23 +21,35 @@ using System.Drawing;
 
 namespace PixelsOfDoom.Map
 {
+    /// <summary>
+    /// A Doom map vertex.
+    /// </summary>
     public struct Vertex
     {
+        /// <summary>
+        /// X-coordinate of this vertex.
+        /// </summary>
         public int X { get; }
+        
+        /// <summary>
+        /// Y-coordinate of this vertex.
+        /// </summary>
         public int Y { get; }
 
-        public Vertex(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="pt">Coordinates of the vertex.</param>
         public Vertex(Point pt)
         {
             X = pt.X;
             Y = pt.Y;
         }
 
+        /// <summary>
+        /// Gets an array of bytes descripting this vertex to add to the VERTEXES (sic) lump.
+        /// </summary>
+        /// <returns>An array of bytes</returns>
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>();

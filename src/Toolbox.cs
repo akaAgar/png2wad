@@ -21,6 +21,9 @@ using System.Drawing;
 
 namespace PixelsOfDoom
 {
+    /// <summary>
+    /// A static "toolbox" class with various class extensions and static methods.
+    /// </summary>
     public static class Toolbox
     {
         /// <summary>
@@ -28,21 +31,45 @@ namespace PixelsOfDoom
         /// </summary>
         private static readonly Random RNG = new Random();
 
+        /// <summary>
+        /// Compares two colors R,G,B values
+        /// </summary>
+        /// <param name="color">A color</param>
+        /// <param name="other">Another color</param>
+        /// <returns>True if all R,G,B values are all the same, false otherwise.</returns>
         public static bool IsSameRGB(this Color color, Color other)
         {
             return (color.R == other.R) && (color.G == other.G) && (color.B == other.B);
         }
 
+        /// <summary>
+        /// Adds two points.
+        /// </summary>
+        /// <param name="point">A point</param>
+        /// <param name="other">Another point</param>
+        /// <returns>A new with X = point.X + other.X and Y = point.Y + other.Y</returns>
         public static Point Add(this Point point, Point other)
         {
             return new Point(point.X + other.X, point.Y + other.Y);
         }
 
+        /// <summary>
+        /// Multiplies a point with another point.
+        /// </summary>
+        /// <param name="point">A point</param>
+        /// <param name="mutiplier">Another point</param>
+        /// <returns>A new with X = point.X * mutiplier.X and Y = point.Y * mutiplier.Y</returns>
         public static Point Mult(this Point point, Point mutiplier)
         {
             return new Point(point.X * mutiplier.X, point.Y * mutiplier.Y);
         }
 
+        /// <summary>
+        /// Turns a string into a System.Drawing.Color.
+        /// Can parse strings in HTML (#xxxxxx), RGB (xxx,xxx,xxx) and KnownColor (Red, Blue, etc.) formats.
+        /// </summary>
+        /// <param name="colorString">A string</param>
+        /// <returns>The color, or null if parsing failed</returns>
         public static Color? GetColorFromString(string colorString)
         {
             int r, g, b;
@@ -134,6 +161,12 @@ namespace PixelsOfDoom
             return array[RNG.Next(array.Length)];
         }
 
+        /// <summary>
+        /// Returns a random element from a list.
+        /// </summary>
+        /// <typeparam name="T">The type of the list</typeparam>
+        /// <param name="list">The list</param>
+        /// <returns>An element from the list</returns>
         public static T RandomFromList<T>(List<T> list)
         {
             if ((list == null) || (list.Count == 0)) return default;
