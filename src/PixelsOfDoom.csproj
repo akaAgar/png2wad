@@ -48,7 +48,6 @@
     <Compile Include="Generator\WallDirection.cs" />
     <Compile Include="Imports\ini-plus-plus\INIFile.cs" />
     <Compile Include="Imports\ini-plus-plus\INIFileSection.cs" />
-    <Compile Include="Map\ThingAngle.cs" />
     <Compile Include="Toolbox.cs" />
     <Compile Include="Generator\MapGenerator.cs" />
     <Compile Include="Map\DoomMap.cs" />
