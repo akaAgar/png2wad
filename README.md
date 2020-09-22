@@ -22,9 +22,13 @@ Syntax is: **PixelsOfDoom.exe SomeImage.png \[SomeOtherImage.png\] \[YetAnotherI
 ### From the GUI
 Drag and drop one or more PNG files on **PixelsOfDoom.exe**
 
-First file will be 
+### Output
 
-Output WAD fi
+Output file will always be generated in the directory where PixelsOfDoom.exe is located and will have a the name of the first PNG file with a wad extension. For instance, if you create a file from SomePlace.png, SomeOtherPlace.png and AThirdPlace.png, the output file will be named SomePlace.wad.
+
+If Doom 1 format has been selected in Preferences.ini, first map will be named ExM1, then ExM2, etc (Where x is the number of the episode as defined in Preferences.ini). Maps beyond ExM9 will be ignored.
+If Doom 2 format has been selected in Prefrences.ini, first map will be named MAP01, then MAP02, MAP03, etc. Maps beyond MAP99 will be ignored.
+Default format is **Doom 2**.
 
 ## Creating images
 
