@@ -20,10 +20,10 @@ using PixelsOfDoom.Generator;
 using PixelsOfDoom.Map;
 using PixelsOfDoom.Wad;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace PixelsOfDoom
 {
@@ -39,7 +39,8 @@ namespace PixelsOfDoom
         private static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { "output.wad", @"..\Release\config.ini", @"..\Release\wolf3d_e1m1.png", @"..\Release\cave.png" };
+            if (args.Length == 0)
+                args = new string[] { @"..\Release\wolf3d_e1m1.png", @"..\Release\cave.png" };
 #endif
 
             using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
@@ -49,12 +50,25 @@ namespace PixelsOfDoom
         /// Constructor.
         /// </summary>
         /// <param name="args">Command-line parameters</param>
-        public PixelsOfDoomProgram(string[] args)
+        public PixelsOfDoomProgram(params string[] args)
         {
-            if (!ParseArguments(args, out string wadFile, out string configFile, out string[] mapBitmapFiles))
-                return;
+            string[] mapBitmapFiles = (from string file in args where File.Exists(file) && Path.GetExtension(file).ToLowerInvariant() == ".png" select file).ToArray();
 
-            Preferences config = new Preferences(configFile);
+            if (mapBitmapFiles.Length == 0)
+            {
+                Console.WriteLine("Missing parameters or no valid PNG file in the parameters.");
+                Console.WriteLine("Syntax is: PixelsOfDoom.exe SomeImage.png [SomeOtherImage.png] [YetAnotherImage.png]...");
+                Console.ReadKey();
+                return;
+            }
+
+            string wadFile = Path.GetFileNameWithoutExtension(mapBitmapFiles[0]) + ".wad"; // Output file is the name of the first file with a WAD extension.
+
+#if DEBUG
+            Preferences config = new Preferences(@"..\Release\Preferences.ini");
+#else
+            Preferences config = new Preferences("Preferences.ini");
+#endif
             MapGenerator generator = new MapGenerator(config);
             WadFile wad = new WadFile();
 
@@ -73,10 +87,7 @@ namespace PixelsOfDoom
 
                     using (Bitmap bitmap = (Bitmap)Image.FromFile(mapBitmapFiles[i]))
                     {
-                        int depth = i;
-                        if (config.Doom1Format) depth += 2 * config.Episode;
-
-                        using (DoomMap map = generator.Generate(mapName, bitmap, depth))
+                        using (DoomMap map = generator.Generate(mapName, bitmap))
                         {
                             map.AddToWad(wad);
                         }
@@ -120,72 +131,11 @@ namespace PixelsOfDoom
                 }
             }
 
-//#if DEBUG
-//            Console.WriteLine();
-//            Console.WriteLine("Press any key");
-//            Console.ReadKey();
-//#endif
-        }
-
-        /// <summary>
-        /// Parses command-lines arguments to search for path for the various files.
-        /// </summary>
-        /// <param name="args">Command-line parameters</param>
-        /// <param name="wadFile">Path to the output .wad file</param>
-        /// <param name="configFile">Path to the config .ini file</param>
-        /// <param name="mapBitmapFiles">Array of paths to the .bmp/.png images to create levels from</param>
-        /// <returns>True if all required paths are present, false if they are not</returns>
-        private bool ParseArguments(string[] args, out string wadFile, out string configFile, out string[] mapBitmapFiles)
-        {
-            wadFile = null;
-            configFile = null;
-            mapBitmapFiles = new string[0];
-
-            if ((args.Length == 0) || (args == null))
-            {
-                PrintMissingParameterMessage();
-                return false;
-            }
-
-            List<string> mapBitmapFilesList = new List<string>();
-
-            foreach (string a in args)
-            {
-                switch (Path.GetExtension(a).ToLowerInvariant())
-                {
-                    case ".bmp":
-                    case ".png":
-                        if (!File.Exists(a)) break;
-                        mapBitmapFilesList.Add(a);
-                        break;
-
-                    case ".ini":
-                        if (!File.Exists(a)) break;
-                        configFile = a;
-                        break;
-
-                    case ".wad":
-                        wadFile = a;
-                        break;
-                }
-            }
-
-            mapBitmapFiles = mapBitmapFilesList.ToArray();
-
-            if ((mapBitmapFiles.Length > 0) && (configFile != null) && (wadFile != null))
-                return true;
-
-            PrintMissingParameterMessage();
-            return false;
-        }
-
-        /// <summary>
-        /// Print error message when a parameter is missing.
-        /// </summary>
-        private void PrintMissingParameterMessage()
-        {
-            Console.WriteLine("Missing parameters.");
-            Console.WriteLine("Parameters must include, in any order: path to an output .wad file, path to a .ini config file, paths to any number of .bmp or .png images");
+#if DEBUG
+            Console.WriteLine();
+            Console.WriteLine("Press any key...");
+            Console.ReadKey();
+#endif
         }
 
         /// <summary>
