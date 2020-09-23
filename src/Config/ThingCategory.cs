@@ -17,18 +17,54 @@ along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
 
 namespace PixelsOfDoom.Config
 {
+    /// <summary>
+    /// A category of thing for the thing generator.
+    /// </summary>
     public enum ThingCategory
     {
+        /// <summary>
+        /// Large ammo pickup (box of bullets, box of shells...)
+        /// </summary>
         AmmoLarge,
+        /// <summary>
+        /// Small ammo pickup (clip, shells...)
+        /// </summary>
         AmmoSmall,
+        /// <summary>
+        /// Armor pickup
+        /// </summary>
         Armor,
+        /// <summary>
+        /// Health pickup
+        /// </summary>
         Health,
+        /// <summary>
+        /// Easy monsters
+        /// </summary>
         MonstersEasy,
+        /// <summary>
+        /// Average difficulty monsters
+        /// </summary>
         MonstersAverage,
+        /// <summary>
+        /// Hard monsters
+        /// </summary>
         MonstersHard,
+        /// <summary>
+        /// Very hard monsters
+        /// </summary>
         MonstersVeryHard,
+        /// <summary>
+        /// Power-ups (invisibility, invulnerability...)
+        /// </summary>
         PowerUps,
+        /// <summary>
+        /// Powerful weapons
+        /// </summary>
         WeaponsHigh,
+        /// <summary>
+        /// Weak weapons
+        /// </summary>
         WeaponsLow,
     }
 }

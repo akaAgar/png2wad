@@ -22,20 +22,61 @@ using System.Drawing;
 
 namespace PixelsOfDoom.Config
 {
+
+    /// <summary>
+    /// Stores the preferences loaded from Preferences.ini.
+    /// </summary>
     public struct Preferences
     {
-        public static readonly int PREFERENCES_THINGS_COUNT = Enum.GetValues(typeof(ThingCategory)).Length;
-        private static readonly int DEFAULT_COLOR = Color.Black.ToArgb();
+        /// <summary>
+        /// Number of things categories.
+        /// </summary>
+        private static readonly int THINGS_CATEGORY_COUNT = Enum.GetValues(typeof(ThingCategory)).Length;
+        
+        /// <summary>
+        /// Color to used for the default theme.
+        /// </summary>
+        private static readonly int DEFAULT_THEME_COLOR = Color.White.ToArgb();
 
+        /// <summary>
+        /// Should nodes be built using bsp-w32 once the map(s) are generated?
+        /// </summary>
         public bool BuildNodes { get; }
+
+        /// <summary>
+        /// Should map names be generated in the Doom 1 (ExMy) format?
+        /// </summary>
         public bool Doom1Format { get; }
+        
+        /// <summary>
+        /// What episode do the maps belong to? Only used when Doom1Format is true.
+        /// </summary>
         public int Episode { get; }
+
+        /// <summary>
+        /// Should entrances and exits be generated?
+        /// </summary>
         public bool GenerateEntranceAndExit { get; }
+        
+        /// <summary>
+        /// Should things (monsters, items...) be generated?
+        /// </summary>
         public bool GenerateThings { get; }
 
+        /// <summary>
+        /// The map themes.
+        /// </summary>
         private readonly Dictionary<int, PreferencesTheme> Themes;
+        
+        /// <summary>
+        /// Array of thing types to pick from for each thing category.
+        /// </summary>
         public int[][] Things { get; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="filePath">Path to the Preferences.ini file.</param>
         public Preferences(string filePath)
         {
             using (INIFile ini = new INIFile(filePath))
@@ -47,13 +88,15 @@ namespace PixelsOfDoom.Config
                 GenerateEntranceAndExit = ini.GetValue("Options", "GenerateEntranceAndExit", true);
                 GenerateThings = ini.GetValue("Options", "GenerateThings", true);
 
-                Things = new int[PREFERENCES_THINGS_COUNT][];
-                for (int i = 0; i < PREFERENCES_THINGS_COUNT; i++)
+                // Load things
+                Things = new int[THINGS_CATEGORY_COUNT][];
+                for (int i = 0; i < THINGS_CATEGORY_COUNT; i++)
                     Things[i] = ini.GetValueArray<int>("Things", ((ThingCategory)i).ToString());
 
+                // Load themes. Default theme is loaded first so it can't be overriden.
                 Themes = new Dictionary<int, PreferencesTheme>
                 {
-                    { DEFAULT_COLOR, new PreferencesTheme(ini, "Theme.Default") }
+                    { DEFAULT_THEME_COLOR, new PreferencesTheme(ini, "Theme.Default") }
                 };
 
                 foreach (string theme in ini.GetKeysInSection("Themes"))
@@ -67,10 +110,16 @@ namespace PixelsOfDoom.Config
             }
         }
 
+        /// <summary>
+        /// Gets a theme from the RGB color of the top-left pixel of a map PNG.
+        /// If no theme use this color, returns the default theme.
+        /// </summary>
+        /// <param name="color">Color of the "theme pixel"</param>
+        /// <returns>A theme</returns>
         public PreferencesTheme GetTheme(Color color)
         {
             int colorInt = color.ToArgb();
-            return Themes.ContainsKey(colorInt) ? Themes[colorInt] : Themes[DEFAULT_COLOR];
+            return Themes.ContainsKey(colorInt) ? Themes[colorInt] : Themes[DEFAULT_THEME_COLOR];
         }
     }
 }
