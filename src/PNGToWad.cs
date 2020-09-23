@@ -1,36 +1,39 @@
 ﻿/*
 ==========================================================================
-This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
-Pixels of Doom is free software: you can redistribute it and/or modify
+This file is part of PNG2WAD, a tool to create Doom maps from PNG files,
+created by @akaAgar (https://github.com/akaAgar/png2wad)
+
+PNG2WAD is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-Pixels of Doom is distributed in the hope that it will be useful,
+
+PNG2WAD is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License
-along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
+along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using PixelsOfDoom.Config;
-using PixelsOfDoom.Generator;
-using PixelsOfDoom.Map;
-using PixelsOfDoom.Wad;
+using PNG2WAD.Config;
+using PNG2WAD.Generator;
+using ToolsOfDoom.Map;
+using ToolsOfDoom.Wad;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 
-namespace PixelsOfDoom
+namespace PNG2WAD
 {
     /// <summary>
     /// Main program. Parses command-line arguments and creates an instance of the generator.
     /// </summary>
-    public sealed class PixelsOfDoomProgram : IDisposable
+    public sealed class PNGToWad : IDisposable
     {
         /// <summary>
         /// Static Main() method. Program entry point.
@@ -43,14 +46,14 @@ namespace PixelsOfDoom
                 args = new string[] { @"..\Release\wolf3d.png", @"..\Release\cave.png", @"..\Release\city_of_hell.png" };
 #endif
 
-            using (PixelsOfDoomProgram db = new PixelsOfDoomProgram(args)) { }
+            using (PNGToWad db = new PNGToWad(args)) { }
         }
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="args">Command-line parameters</param>
-        public PixelsOfDoomProgram(params string[] args)
+        public PNGToWad(params string[] args)
         {
             string[] mapBitmapFiles = (from string file in args where File.Exists(file) && Path.GetExtension(file).ToLowerInvariant() == ".png" select file).ToArray();
 

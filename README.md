@@ -1,10 +1,12 @@
-# Pixels of Doom
+# PNG2WAD
 
 A C# (.Net/Mono) command line tool to turn BMP/PNG images to Doom maps.
 
-Pixels of Doom is also a very good way to learn about the (very elegant) Doom map format. To learn more about Doom maps and archives, and better understand this source code, you should read the [Unofficial Doom Specs](http://www.gamers.org/dhs/helpdocs/dmsp1666.html) by Matthew S. Fell.
-
 ![Preview images](preview.png)
+
+**Depends on two other open source projects you can find in my GitHub:**
+- [ToolsOfDoom](https://github.com/akaAgar/tools-of-doom) to create Doom maps and wad files
+- [INIPlusPlus](https://github.com/akaAgar/ini-plus-plus) to load Preferences.ini
 
 ## Features
 - Any bitmap size
@@ -17,14 +19,14 @@ Pixels of Doom is also a very good way to learn about the (very elegant) Doom ma
 ## Usage
 
 ### Using the command-line
-Syntax is: **PixelsOfDoom.exe SomeImage.png \[SomeOtherImage.png\] \[YetAnotherImage.png\]...**
+Syntax is: **PNG2WAD.exe SomeImage.png \[SomeOtherImage.png\] \[YetAnotherImage.png\]...**
 
 ### From the GUI
-Drag and drop one or more PNG files on **PixelsOfDoom.exe**
+Drag and drop one or more PNG files on **PNG2WAD.exe**
 
 ### Output
 
-Output file will always be generated in the directory where PixelsOfDoom.exe is located and will have a the name of the first PNG file with a wad extension. For instance, if you create a file from SomePlace.png, SomeOtherPlace.png and AThirdPlace.png, the output file will be named SomePlace.wad.
+Output file will always be generated in the directory where PNG2WAD.exe is located and will have a the name of the first PNG file with a wad extension. For instance, if you create a file from SomePlace.png, SomeOtherPlace.png and AThirdPlace.png, the output file will be named SomePlace.wad.
 
 If Doom 1 format has been selected in Preferences.ini, first map will be named ExM1, then ExM2, etc (Where x is the number of the episode as defined in Preferences.ini). Maps beyond ExM9 will be ignored.
 If Doom 2 format has been selected in Prefrences.ini, first map will be named MAP01, then MAP02, MAP03, etc. Maps beyond MAP99 will be ignored.

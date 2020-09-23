@@ -1,28 +1,30 @@
 ﻿/*
 ==========================================================================
-This file is part of Pixels of Doom, a tool to create Doom maps from PNG files
-by @akaAgar (https://github.com/akaAgar/pixels-of-doom)
-Pixels of Doom is free software: you can redistribute it and/or modify
+This file is part of PNG2WAD, a tool to create Doom maps from PNG files,
+created by @akaAgar (https://github.com/akaAgar/png2wad)
+
+PNG2WAD is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-Pixels of Doom is distributed in the hope that it will be useful,
+
+PNG2WAD is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License
-along with Pixels of Doom. If not, see https://www.gnu.org/licenses/
+along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using PixelsOfDoom.Config;
-using PixelsOfDoom.Map;
+using PNG2WAD.Config;
+using ToolsOfDoom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 
-namespace PixelsOfDoom.Generator
+namespace PNG2WAD.Generator
 {
     public sealed class MapGenerator : IDisposable
     {
@@ -62,9 +64,9 @@ namespace PixelsOfDoom.Generator
             CreateSectors(map);
             CreateLines(map);
 
-            using (ThingSkillVariation thingsMaker = new ThingSkillVariation(Preferences, Theme))
+            using (ThingsGenerator thingsGenerator = new ThingsGenerator(Preferences, Theme))
             {
-                thingsMaker.CreateThings(map, SubTiles);
+                thingsGenerator.CreateThings(map, SubTiles);
             }
 
             return map;
@@ -242,15 +244,15 @@ namespace PixelsOfDoom.Generator
 
             if (neighborSector < 0) // neighbor is a wall, create an impassible linedef
             {
-                map.Sidedefs.Add(new Sidedef("-", "-", SectorsInfo[sector].WallTexture, sector));
+                map.Sidedefs.Add(new Sidedef(0, 0, "-", "-", SectorsInfo[sector].WallTexture, sector));
                 map.Linedefs.Add(new Linedef(v1, v2, LinedefFlags.Impassible | LinedefFlags.LowerUnpegged, 0, 0, -1, map.Sidedefs.Count - 1));
             }
             else // neighbor is another sector, create a two-sided linedef
             {
                 int lineSpecial = Math.Max(SectorsInfo[sector].LinedefSpecial, SectorsInfo[neighborSector].LinedefSpecial);
 
-                map.Sidedefs.Add(new Sidedef(neighborSector, SectorsInfo[neighborSector], SectorsInfo[sector]));
-                map.Sidedefs.Add(new Sidedef(sector, SectorsInfo[sector], SectorsInfo[neighborSector]));
+                map.Sidedefs.Add(CreateTwoSidedSidedef(neighborSector, SectorsInfo[neighborSector], SectorsInfo[sector]));
+                map.Sidedefs.Add(CreateTwoSidedSidedef(sector, SectorsInfo[sector], SectorsInfo[neighborSector]));
 
                 if (needsFlipping)
                     map.Linedefs.Add(new Linedef(v2, v1, LinedefFlags.TwoSided, lineSpecial, 0, map.Sidedefs.Count - 1, map.Sidedefs.Count - 2));
@@ -259,6 +261,30 @@ namespace PixelsOfDoom.Generator
             }
 
             return length;
+        }
+
+        /// <summary>
+        /// Creates a sidedef from two SectorInfo
+        /// </summary>
+        /// <param name="sectorID">Sector this sidedef faces</param>
+        /// <param name="sector">Info about the sector this sidedef faces</param>
+        /// <param name="neighborSector">Info about the sector this sidedef's opposing sector</param>
+        private Sidedef CreateTwoSidedSidedef(int sectorID, SectorInfo sector, SectorInfo neighborSector)
+        {
+            string lowerTexture, upperTexture;
+
+            if (neighborSector.Type == TileType.Door)
+            {
+                upperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? neighborSector.WallTextureUpper : "-";
+                lowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? neighborSector.WallTextureLower : "-";
+            }
+            else
+            {
+                upperTexture = (neighborSector.CeilingHeight < sector.CeilingHeight) ? sector.WallTexture : "-";
+                lowerTexture = (neighborSector.FloorHeight > sector.FloorHeight) ? sector.WallTexture : "-";
+            }
+
+            return new Sidedef(0, 0, upperTexture, lowerTexture, "-", sectorID);
         }
 
         private int GetSector(Point position) { return GetSector(position.X, position.Y); }
@@ -324,8 +350,14 @@ namespace PixelsOfDoom.Generator
                         }
                     }
 
-                    SectorsInfo.Add(new SectorInfo(SubTiles[x, y], Theme, ThemeTextures));
-                    map.Sectors.Add(new Sector(SectorsInfo.Last()));
+                    SectorInfo sectorInfo = new SectorInfo(SubTiles[x, y], Theme, ThemeTextures);
+                    SectorsInfo.Add(sectorInfo);
+
+                    map.Sectors.Add(
+                        new Sector(
+                            sectorInfo.FloorHeight, sectorInfo.CeilingHeight,
+                            sectorInfo.FloorTexture, sectorInfo.CeilingTexture,
+                            sectorInfo.LightLevel, sectorInfo.SectorSpecial, 0));
                 }
         }
 

@@ -1,1 +1,0 @@
-﻿Import files are copied from other projets in my GitHub (https://github.com/akaAgar/).

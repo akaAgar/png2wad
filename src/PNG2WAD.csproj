@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3CC84FFB-D6BA-4583-A8BF-3B10BA6AE804}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>PixelsOfDoom</RootNamespace>
-    <AssemblyName>PixelsOfDoom</AssemblyName>
+    <RootNamespace>PNG2WAD</RootNamespace>
+    <AssemblyName>PNG2WAD</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -32,10 +32,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="INIPlusPlus">
+      <HintPath>..\INIPlusPlus.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Data" />
+    <Reference Include="ToolsOfDoom">
+      <HintPath>..\ToolsOfDoom.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\PreferencesTheme.cs" />
@@ -47,29 +53,14 @@
     <Compile Include="Generator\ThingsGenerator.cs" />
     <Compile Include="Generator\TileType.cs" />
     <Compile Include="Generator\WallDirection.cs" />
-    <Compile Include="Imports\ini-plus-plus\INIFile.cs" />
-    <Compile Include="Imports\ini-plus-plus\INIFileSection.cs" />
     <Compile Include="Toolbox.cs" />
     <Compile Include="Generator\MapGenerator.cs" />
-    <Compile Include="Map\DoomMap.cs" />
-    <Compile Include="Map\ThingOptions.cs" />
-    <Compile Include="Map\LinedefFlags.cs" />
-    <Compile Include="Map\Sector.cs" />
-    <Compile Include="Map\Vertex.cs" />
-    <Compile Include="Map\Thing.cs" />
-    <Compile Include="Map\Sidedef.cs" />
-    <Compile Include="Map\Linedef.cs" />
     <Compile Include="Config\Preferences.cs" />
-    <Compile Include="PixelsOfDoomProgram.cs" />
+    <Compile Include="PNGToWad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wad\WadFile.cs" />
-    <Compile Include="Wad\WadLump.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Imports\About imports.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
