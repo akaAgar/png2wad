@@ -62,7 +62,7 @@ namespace PixelsOfDoom.Generator
             CreateSectors(map);
             CreateLines(map);
 
-            using (ThingsMaker thingsMaker = new ThingsMaker(Preferences, Theme))
+            using (ThingSkillVariation thingsMaker = new ThingSkillVariation(Preferences, Theme))
             {
                 thingsMaker.CreateThings(map, SubTiles);
             }

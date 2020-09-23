@@ -43,7 +43,8 @@
     <Compile Include="Config\ThingCategory.cs" />
     <Compile Include="Config\ThemeTexture.cs" />
     <Compile Include="Generator\SectorInfo.cs" />
-    <Compile Include="Generator\ThingsMaker.cs" />
+    <Compile Include="Generator\ThingSkillVariation.cs" />
+    <Compile Include="Generator\ThingsGenerator.cs" />
     <Compile Include="Generator\TileType.cs" />
     <Compile Include="Generator\WallDirection.cs" />
     <Compile Include="Imports\ini-plus-plus\INIFile.cs" />
