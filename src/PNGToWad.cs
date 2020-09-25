@@ -38,7 +38,7 @@ namespace PNG2WAD
         /// <summary>
         /// Static Main() method. Program entry point.
         /// </summary>
-        /// <param name="args">Command-line parameters</param>
+        /// <param name="args">Command line parameters</param>
         private static void Main(string[] args)
         {
 #if DEBUG
@@ -52,7 +52,7 @@ namespace PNG2WAD
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="args">Command-line parameters</param>
+        /// <param name="args">Command line parameters</param>
         public PNGToWad(params string[] args)
         {
             string[] mapBitmapFiles = (from string file in args where File.Exists(file) && Path.GetExtension(file).ToLowerInvariant() == ".png" select file).ToArray();
@@ -133,12 +133,6 @@ namespace PNG2WAD
                         break;
                 }
             }
-
-#if DEBUG
-            Console.WriteLine();
-            Console.WriteLine("Press any key...");
-            Console.ReadKey();
-#endif
         }
 
         /// <summary>
