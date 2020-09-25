@@ -23,20 +23,72 @@ using System;
 
 namespace PNG2WAD.Generator
 {
+    /// <summary>
+    /// Information about a sector. Includes all data required by the SECTORS lump in the wad file, but also about the wall textures.
+    /// </summary>
     public struct SectorInfo
     {
+        /// <summary>
+        /// Type of sector.
+        /// </summary>
         public TileType Type { get; }
+
+        /// <summary>
+        /// Ceiling height.
+        /// </summary>
         public int CeilingHeight { get; private set; }
+
+        /// <summary>
+        /// Ceiling texture.
+        /// </summary>
         public string CeilingTexture { get; private set; }
+
+        /// <summary>
+        /// Floor height.
+        /// </summary>
         public int FloorHeight { get; private set; }
+        
+        /// <summary>
+        /// Floor texture.
+        /// </summary>
         public string FloorTexture { get; private set; }
+        
+        /// <summary>
+        /// Light level.
+        /// </summary>
         public int LightLevel { get; private set; }
+        
+        /// <summary>
+        /// Special type of linedefs facing this sector.
+        /// </summary>
         public int LinedefSpecial { get; private set; }
+
+        /// <summary>
+        /// Special type of this sector.
+        /// </summary>
         public int SectorSpecial { get; private set; }
+        
+        /// <summary>
+        /// Wall texture.
+        /// </summary>
         public string WallTexture { get; private set; }
+        
+        /// <summary>
+        /// Upper wall texture.
+        /// </summary>
         public string WallTextureUpper { get; private set; }
+        
+        /// <summary>
+        /// Lower wall texture.
+        /// </summary>
         public string WallTextureLower { get; private set; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="type">Type of sector</param>
+        /// <param name="theme">Map theme</param>
+        /// <param name="themeTextures">Selected "default" textures for this map</param>
         public SectorInfo(TileType type, PreferencesTheme theme, string[] themeTextures)
         {
             Type = type;
@@ -82,7 +134,10 @@ namespace PNG2WAD.Generator
                 case TileType.RoomExterior:
                     ApplySectorSpecial(theme, ThemeSector.Exterior);
                     CeilingTexture = "F_SKY1";
-                    FloorTexture = themeTextures[(int)ThemeTexture.FloorExterior];
+                    if (theme.Textures[(int)ThemeTexture.FloorExterior].Length > 0)
+                        FloorTexture = themeTextures[(int)ThemeTexture.FloorExterior];
+                    if (theme.Textures[(int)ThemeTexture.WallExterior].Length > 0)
+                        WallTexture = Toolbox.RandomFromArray(theme.Textures[(int)ThemeTexture.WallExterior]);
                     break;
 
                 case TileType.RoomSpecialCeiling:
@@ -109,6 +164,11 @@ namespace PNG2WAD.Generator
             WallTextureLower = WallTextureLower ?? WallTexture;
         }
 
+        /// <summary>
+        /// Applies parameters read from a ThemeSector.
+        /// </summary>
+        /// <param name="theme">The map theme</param>
+        /// <param name="themeSector">Type of ThemeSector to copy parameters from</param>
         private void ApplySectorSpecial(PreferencesTheme theme, ThemeSector themeSector)
         {
             CeilingHeight = theme.Height[(int)themeSector][1];
