@@ -20,17 +20,50 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 
 namespace PNG2WAD.Config
 {
+    /// <summary>
+    /// Enumerates the textures used by a theme.
+    /// </summary>
     public enum ThemeTexture
     {
+        /// <summary>
+        /// Default ceiling.
+        /// </summary>
         Ceiling,
+        /// <summary>
+        /// Special ceiling.
+        /// </summary>
         CeilingSpecial,
+        /// <summary>
+        /// Door.
+        /// </summary>
         Door,
+        /// <summary>
+        /// Door side.
+        /// </summary>
         DoorSide,
+        /// <summary>
+        /// Default floor.
+        /// </summary>
         Floor,
+        /// <summary>
+        /// Floor on the entrance tile.
+        /// </summary>
         FloorEntrance,
+        /// <summary>
+        /// Floor on the exit tile.
+        /// </summary>
         FloorExit,
+        /// <summary>
+        /// Floor in exterior tiles.
+        /// </summary>
         FloorExterior,
+        /// <summary>
+        /// Special floor.
+        /// </summary>
         FloorSpecial,
+        /// <summary>
+        /// Wall.
+        /// </summary>
         Wall
     }
 }

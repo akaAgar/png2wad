@@ -20,14 +20,38 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 
 namespace PNG2WAD.Config
 {
+    /// <summary>
+    /// Enumerates the various sector types in a theme.
+    /// </summary>
     public enum ThemeSector
     {
+        /// <summary>
+        /// Default sector.
+        /// </summary>
         Default,
+        /// <summary>
+        /// Door side.
+        /// </summary>
         DoorSide,
+        /// <summary>
+        /// Entrance.
+        /// </summary>
         Entrance,
+        /// <summary>
+        /// Exit.
+        /// </summary>
         Exit,
+        /// <summary>
+        /// Exterior.
+        /// </summary>
         Exterior,
+        /// <summary>
+        /// Special ceiling.
+        /// </summary>
         SpecialCeiling,
+        /// <summary>
+        /// Special floor.
+        /// </summary>
         SpecialFloor
     }
 }

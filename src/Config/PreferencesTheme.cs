@@ -23,6 +23,9 @@ using System;
 
 namespace PNG2WAD.Config
 {
+    /// <summary>
+    /// Stores information for a theme in the preferences
+    /// </summary>
     public struct PreferencesTheme
     {
         public static readonly int THEME_SECTORS_COUNT = Enum.GetValues(typeof(ThemeSector)).Length;
