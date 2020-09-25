@@ -34,12 +34,12 @@ namespace PNG2WAD.Config
         /// <summary>
         /// Number of things categories.
         /// </summary>
-        private static readonly int THINGS_CATEGORY_COUNT = Enum.GetValues(typeof(ThingCategory)).Length;
-        
+        public static readonly int THINGS_CATEGORY_COUNT = Enum.GetValues(typeof(ThingCategory)).Length;
+
         /// <summary>
         /// Color to used for the default theme.
         /// </summary>
-        private static readonly int DEFAULT_THEME_COLOR = Color.White.ToArgb();
+        public static readonly int DEFAULT_THEME_COLOR = Color.White.ToArgb();
 
         /// <summary>
         /// Should nodes be built using bsp-w32 once the map(s) are generated?
@@ -74,7 +74,12 @@ namespace PNG2WAD.Config
         /// <summary>
         /// Array of thing types to pick from for each thing category.
         /// </summary>
-        public int[][] Things { get; }
+        public int[][] ThingsTypes { get; }
+
+                /// <summary>
+        /// Min/Max amount of things to spawn for each thing category.
+        /// </summary>
+        public int[][] ThingsCount { get; }
 
         /// <summary>
         /// Constructor.
@@ -92,9 +97,15 @@ namespace PNG2WAD.Config
                 GenerateThings = ini.GetValue("Options", "GenerateThings", true);
 
                 // Load things
-                Things = new int[THINGS_CATEGORY_COUNT][];
+                ThingsTypes = new int[THINGS_CATEGORY_COUNT][];
+                ThingsCount = new int[THINGS_CATEGORY_COUNT][];
                 for (int i = 0; i < THINGS_CATEGORY_COUNT; i++)
-                    Things[i] = ini.GetValueArray<int>("Things", ((ThingCategory)i).ToString());
+                {
+                    ThingsTypes[i] = ini.GetValueArray<int>("Things", $"Types.{(ThingCategory)i}");
+                    ThingsCount[i] = ini.GetValueArray<int>("Things", $"Count.{(ThingCategory)i}");
+                    Array.Resize(ref ThingsCount[i], 2);
+                    ThingsCount[i] = new int[] { Math.Min(ThingsCount[i][0], ThingsCount[i][1]), Math.Max(ThingsCount[i][0], ThingsCount[i][1]) };
+                }
 
                 // Load themes. Default theme is loaded first so it can't be overriden.
                 Themes = new Dictionary<int, PreferencesTheme>
