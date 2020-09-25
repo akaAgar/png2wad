@@ -64,6 +64,10 @@ namespace PNG2WAD.Config
         /// <summary>
         /// Wall.
         /// </summary>
-        Wall
+        Wall,
+        /// <summary>
+        /// Wall for exterior sectors.
+        /// </summary>
+        WallExterior
     }
 }
