@@ -26,6 +26,9 @@ using System.Drawing;
 
 namespace PNG2WAD.Generator
 {
+    /// <summary>
+    /// Things generator. Creates player starts, items, monsters and other things.
+    /// </summary>
     public sealed class ThingsGenerator : IDisposable
     {
         /// <summary>
@@ -33,13 +36,30 @@ namespace PNG2WAD.Generator
         /// </summary>
         private const int DEFAULT_ANGLE = 90;
 
+        /// <summary>
+        /// Number of deathmatch starts.
+        /// </summary>
         private const int DEATHMATCH_STARTS_COUNT = 8;
 
+        /// <summary>
+        /// PNG2WAD Preferences.
+        /// </summary>
         private readonly Preferences Preferences;
+        
+        /// <summary>
+        /// Map theme to used.
+        /// </summary>
         private readonly PreferencesTheme Theme;
 
+        /// <summary>
+        /// List of 64x64 where a thing can be spawned.
+        /// </summary>
         private readonly List<Point> FreeTiles;
-        private float MapSizeMultiplier;
+
+        /// <summary>
+        /// Multiplier to the base number of things in each ThingCategory. 
+        /// </summary>
+        private float ThingsCountMultiplier;
 
         public ThingsGenerator(Preferences preferences, PreferencesTheme theme)
         {
@@ -51,7 +71,7 @@ namespace PNG2WAD.Generator
 
         public void CreateThings(DoomMap map, TileType[,] subTiles)
         {
-            int x, y;
+            int i, x, y;
 
             FreeTiles.Clear();
             for (x = 0; x < subTiles.GetLength(0); x += MapGenerator.SUBTILE_DIVISIONS)
@@ -71,7 +91,7 @@ namespace PNG2WAD.Generator
                     FreeTiles.Add(new Point(x / MapGenerator.SUBTILE_DIVISIONS, y / MapGenerator.SUBTILE_DIVISIONS));
                 }
 
-            MapSizeMultiplier = FreeTiles.Count / 1000.0f;
+            ThingsCountMultiplier = FreeTiles.Count / 1000.0f;
 
             if (Preferences.GenerateEntranceAndExit)
             { 
@@ -81,29 +101,16 @@ namespace PNG2WAD.Generator
 
             if (Preferences.GenerateThings)
             {
-                AddThings(map, ThingCategory.MonstersVeryHard, 2, 5);
-                AddThings(map, ThingCategory.MonstersHard, 5, 10);
-                AddThings(map, ThingCategory.MonstersAverage, 15, 25);
-                AddThings(map, ThingCategory.MonstersEasy, 15, 25);
-
-                AddThings(map, ThingCategory.PowerUps, 0, 2);
-
-                AddThings(map, ThingCategory.WeaponsHigh, 1, 3);
-                AddThings(map, ThingCategory.WeaponsLow, 2, 4);
-
-                AddThings(map, ThingCategory.Health, 8, 10);
-
-                AddThings(map, ThingCategory.AmmoLarge, 4, 8);
-                AddThings(map, ThingCategory.AmmoSmall, 8, 12);
-                AddThings(map, ThingCategory.Armor, 2, 4);
+                for (i = 0; i < Preferences.THINGS_CATEGORY_COUNT; i++)
+                    AddThings(map, (ThingCategory)i, Preferences.ThingsCount[i][0], Preferences.ThingsCount[i][1]);
             }
         }
 
         private void AddThings(DoomMap map, ThingCategory thingCategory, int minCount, int maxCount, ThingSkillVariation skillVariation = ThingSkillVariation.None)
         {
             int count = Toolbox.RandomInt(minCount, maxCount + 1);
-            count = (int)(count * MapSizeMultiplier);
-            AddThings(map, count, skillVariation, Preferences.Things[(int)thingCategory]);
+            count = (int)(count * ThingsCountMultiplier);
+            AddThings(map, count, skillVariation, Preferences.ThingsTypes[(int)thingCategory]);
         }
 
         private void AddThings(DoomMap map, int count, ThingSkillVariation skillVariation, params int[] thingTypes)

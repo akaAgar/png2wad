@@ -52,7 +52,7 @@
     <Compile Include="Generator\ThingSkillVariation.cs" />
     <Compile Include="Generator\ThingsGenerator.cs" />
     <Compile Include="Generator\TileType.cs" />
-    <Compile Include="Generator\WallDirection.cs" />
+    <Compile Include="Generator\TileSide.cs" />
     <Compile Include="Toolbox.cs" />
     <Compile Include="Generator\MapGenerator.cs" />
     <Compile Include="Config\Preferences.cs" />

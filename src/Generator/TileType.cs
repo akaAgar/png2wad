@@ -20,20 +20,50 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 
 namespace PNG2WAD.Generator
 {
+    /// <summary>
+    /// Type of tile.
+    /// </summary>
     public enum TileType
     {
+        /// <summary>
+        /// Wall.
+        /// </summary>
         Wall,
-        
+        /// <summary>
+        /// Default room.
+        /// </summary>
         Room,
+        /// <summary>
+        /// Exterior room.
+        /// </summary>
         RoomExterior,
+        /// <summary>
+        /// Room with special ceiling.
+        /// </summary>
         RoomSpecialCeiling,
+        /// <summary>
+        /// Room with special floor.
+        /// </summary>
         RoomSpecialFloor,
-
+        /// <summary>
+        /// Door.
+        /// </summary>
         Door,
+        /// <summary>
+        /// Door side.
+        /// </summary>
         DoorSide,
+        /// <summary>
+        /// Secret passage.
+        /// </summary>
         Secret,
-
+        /// <summary>
+        /// Entrance.
+        /// </summary>
         Entrance,
+        /// <summary>
+        /// Exit.
+        /// </summary>
         Exit
     }
 }

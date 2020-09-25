@@ -28,14 +28,41 @@ namespace PNG2WAD.Config
     /// </summary>
     public struct PreferencesTheme
     {
+        /// <summary>
+        /// Total number of values in the ThemeSector enum.
+        /// </summary>
         public static readonly int THEME_SECTORS_COUNT = Enum.GetValues(typeof(ThemeSector)).Length;
+
+        /// <summary>
+        /// Total number of values in the ThemeTexture enum.
+        /// </summary>
         public static readonly int THEME_TEXTURES_COUNT = Enum.GetValues(typeof(ThemeTexture)).Length;
 
+        /// <summary>
+        /// Floor/Ceiling heights. Two int32s (floor, ceiling) per ThemeSector.
+        /// </summary>
         public int[][] Height { get; }
+
+        /// <summary>
+        /// Light levels. One int32 per ThemeSector.
+        /// </summary>
         public int[] LightLevel { get; }
+
+        /// <summary>
+        /// Sector special types. One int32 per ThemeSector.
+        /// </summary>
         public int[] SectorSpecial { get; }
+
+        /// <summary>
+        /// Textures. A string array per ThemeTexture.
+        /// </summary>
         public string[][] Textures { get; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="ini">Ini file to load from</param>
+        /// <param name="section">Theme section in the ini file</param>
         public PreferencesTheme(INIFile ini, string section)
         {
             int i;
