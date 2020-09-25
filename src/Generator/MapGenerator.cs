@@ -167,17 +167,17 @@ namespace PNG2WAD.Generator
                     {
                         if (linesSet[x, y, i]) continue; // Line already drawn
 
-                        Point neighborDirection = GetDirectionOffset((WallDirection)i);
+                        Point neighborDirection = GetDirectionOffset((TileSide)i);
 
                         int neighborSector = GetSector(x + neighborDirection.X, y + neighborDirection.Y);
                         if (sector == neighborSector) continue; // Same sector on both sides, no need to add a line
 
-                        if ((neighborSector >= 0) && ((i == (int)WallDirection.South) || (i == (int)WallDirection.East)))
+                        if ((neighborSector >= 0) && ((i == (int)TileSide.South) || (i == (int)TileSide.East)))
                             continue; // Make sure two-sided lines aren't drawn twice
 
                         bool vertical = (neighborDirection.X != 0);
 
-                        int length = AddLine(map, new Point(x, y), (WallDirection)i, vertical, sector, neighborSector);
+                        int length = AddLine(map, new Point(x, y), (TileSide)i, vertical, sector, neighborSector);
 
                         for (int j = 0; j < length; j++)
                         {
@@ -189,18 +189,18 @@ namespace PNG2WAD.Generator
                 }
         }
 
-        private static Point GetDirectionOffset(WallDirection direction)
+        private static Point GetDirectionOffset(TileSide direction)
         {
             switch (direction)
             {
                 default: return new Point(0, -1); // case WallDirection.North
-                case WallDirection.East: return new Point(1, 0);
-                case WallDirection.South: return new Point(0, 1);
-                case WallDirection.West: return new Point(-1, 0);
+                case TileSide.East: return new Point(1, 0);
+                case TileSide.South: return new Point(0, 1);
+                case TileSide.West: return new Point(-1, 0);
             }
         }
 
-        private int AddLine(DoomMap map, Point position, WallDirection neighborDirection, bool vertical, int sector, int neighborSector)
+        private int AddLine(DoomMap map, Point position, TileSide neighborDirection, bool vertical, int sector, int neighborSector)
         {
             bool flipVectors = false;
             Point vertexOffset = Point.Empty;
@@ -211,13 +211,13 @@ namespace PNG2WAD.Generator
 
             switch (neighborDirection)
             {
-                case WallDirection.West:
+                case TileSide.West:
                     flipVectors = true;
                     break;
-                case WallDirection.East:
+                case TileSide.East:
                     vertexOffset = new Point(1, 0);
                     break;
-                case WallDirection.South:
+                case TileSide.South:
                     flipVectors = true;
                     vertexOffset = new Point(0, 1);
                     break;

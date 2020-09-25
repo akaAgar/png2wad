@@ -20,11 +20,26 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 
 namespace PNG2WAD.Generator
 {
-    public enum WallDirection
+    /// <summary>
+    /// Four sides of a tile. Used for linedef generation.
+    /// </summary>
+    public enum TileSide
     {
+        /// <summary>
+        /// North.
+        /// </summary>
         North,
+        /// <summary>
+        /// East.
+        /// </summary>
         East,
+        /// <summary>
+        /// South.
+        /// </summary>
         South,
+        /// <summary>
+        /// West.
+        /// </summary>
         West
     }
 }
