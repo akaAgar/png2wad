@@ -56,11 +56,6 @@ namespace PNG2WAD.Generator
         /// </summary>
         private readonly List<Point> FreeTiles;
 
-        /// <summary>
-        /// Multiplier to the base number of things in each ThingCategory. 
-        /// </summary>
-        private float ThingsCountMultiplier;
-
         public ThingsGenerator(Preferences preferences, PreferencesTheme theme)
         {
             Preferences = preferences;
@@ -91,7 +86,6 @@ namespace PNG2WAD.Generator
                     FreeTiles.Add(new Point(x / MapGenerator.SUBTILE_DIVISIONS, y / MapGenerator.SUBTILE_DIVISIONS));
                 }
 
-            ThingsCountMultiplier = FreeTiles.Count / 1000.0f;
 
             if (Preferences.GenerateEntranceAndExit)
             { 
@@ -99,17 +93,19 @@ namespace PNG2WAD.Generator
                 AddThings(map, DEATHMATCH_STARTS_COUNT, ThingSkillVariation.None, 11); // Deathmatch starts (spawned anywhere on the map)
             }
 
+            float thingsCountMultiplier = FreeTiles.Count / 1000.0f; // Bigger map = more things
+
             if (Preferences.GenerateThings)
             {
                 for (i = 0; i < Preferences.THINGS_CATEGORY_COUNT; i++)
-                    AddThings(map, (ThingCategory)i, Preferences.ThingsCount[i][0], Preferences.ThingsCount[i][1]);
+                    AddThings(map, (ThingCategory)i,
+                        (int)(Preferences.ThingsCount[i][0] * thingsCountMultiplier), (int)(Preferences.ThingsCount[i][1] * thingsCountMultiplier));
             }
         }
 
         private void AddThings(DoomMap map, ThingCategory thingCategory, int minCount, int maxCount, ThingSkillVariation skillVariation = ThingSkillVariation.None)
         {
             int count = Toolbox.RandomInt(minCount, maxCount + 1);
-            count = (int)(count * ThingsCountMultiplier);
             AddThings(map, count, skillVariation, Preferences.ThingsTypes[(int)thingCategory]);
         }
 
