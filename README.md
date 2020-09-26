@@ -1,6 +1,7 @@
 # PNG2WAD
 
 A C# (.Net/Mono) command line tool to turn BMP/PNG images to Doom maps.
+Not interested in the source code and just want to have fun? You'll find binaries in the **bin/Release** directory.
 
 ![Preview images](preview.png)
 
