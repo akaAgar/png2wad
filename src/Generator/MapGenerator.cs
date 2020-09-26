@@ -19,40 +19,95 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 */
 
 using PNG2WAD.Config;
-using ToolsOfDoom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using ToolsOfDoom.Map;
 
 namespace PNG2WAD.Generator
 {
+    /// <summary>
+    /// Map generator. Turns a PNG image into a Doom map.
+    /// </summary>
     public sealed class MapGenerator : IDisposable
     {
+        /// <summary>
+        /// Size of each tile (one tile = one pixel in the PNG image) in Doom map units.
+        /// </summary>
         public const int TILE_SIZE = 64;
-        public const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
+
+        /// <summary>
+        /// Number of subdivisions of each tile.
+        /// Required to generate doors, as doors are divided into 3 sectors: 3 "doorstep" subtiles, 2 "door" subtiles and then 3 "doorstep" subtiles again.
+        /// </summary>
         public const int SUBTILE_DIVISIONS = 8;
 
+        /// <summary>
+        /// The size of each subtile, in Doom map units.
+        /// </summary>
+        public const int SUBTILE_SIZE = TILE_SIZE / SUBTILE_DIVISIONS;
+
+        /// <summary>
+        /// Multiplier to get the position of a vertex from the map subtiles coordinates.
+        /// Y axis has to be inverted because of the way Doom maps are made.
+        /// </summary>
         private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(SUBTILE_SIZE, -SUBTILE_SIZE);
 
-        private readonly Random RNG;
-
+        /// <summary>
+        /// Number of subtiles on the X-axis (equals to "source PNG width × SUBTILE_SIZE)
+        /// </summary>
         private int MapSubWidth { get { return SubTiles.GetLength(0); } }
+
+        /// <summary>
+        /// Number of subtiles on the Y-axis (equals to "source PNG height × SUBTILE_SIZE)
+        /// </summary>
         private int MapSubHeight { get { return SubTiles.GetLength(1); } }
 
+        /// <summary>
+        /// Map theme to use.
+        /// </summary>
         private PreferencesTheme Theme;
+
+        /// <summary>
+        /// Selected texture for each ThemeTexture category.
+        /// </summary>
         private string[] ThemeTextures;
+
+        /// <summary>
+        /// Type of each map sub-tile.
+        /// </summary>
         private TileType[,] SubTiles;
+
+        /// <summary>
+        /// Sector index of each map sub-tile.
+        /// </summary>
         private int[,] Sectors;
+
+        /// <summary>
+        /// List to sector info from which to generate sectors and linedefs.
+        /// </summary>
         private List<SectorInfo> SectorsInfo;
 
+        /// <summary>
+        /// PNG2WAD preferences.
+        /// </summary>
         private readonly Preferences Preferences;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="preferences">PNG2WAD preferences</param>
         public MapGenerator(Preferences preferences)
         {
-            RNG = new Random();
             Preferences = preferences;
         }
 
+        /// <summary>
+        /// Generates the map.
+        /// </summary>
+        /// <param name="name">Map name (MAP01, E1M1, etc)</param>
+        /// <param name="bitmap">PNG to generate the file from</param>
+        /// <returns>A Doom map</returns>
         public DoomMap Generate(string name, Bitmap bitmap)
         {
             if (bitmap == null) return null;
@@ -64,7 +119,7 @@ namespace PNG2WAD.Generator
             CreateSectors(map);
             CreateLines(map);
 
-            using (ThingsGenerator thingsGenerator = new ThingsGenerator(Preferences, Theme))
+            using (ThingsGenerator thingsGenerator = new ThingsGenerator(Preferences))
             {
                 thingsGenerator.CreateThings(map, SubTiles);
             }
@@ -72,6 +127,10 @@ namespace PNG2WAD.Generator
             return map;
         }
 
+        /// <summary>
+        /// Selects the proper theme from the PNG's upper-leftmost pixel, and picks random textures.
+        /// </summary>
+        /// <param name="bitmap">The PNG image</param>
         private void CreateTheme(Bitmap bitmap)
         {
             Theme = Preferences.GetTheme(bitmap.GetPixel(0, 0));
@@ -82,6 +141,11 @@ namespace PNG2WAD.Generator
                 ThemeTextures[i] = Toolbox.RandomFromArray(Theme.Textures[i]);
         }
 
+        /// <summary>
+        /// Get a tile type from a pixel.
+        /// </summary>
+        /// <param name="pixel">A pixel on the PNG image</param>
+        /// <returns>A tile type</returns>
         private TileType GetTileTypeFromPixel(Color pixel)
         {
             if (pixel.IsSameRGB(Color.White)) return TileType.Wall;
@@ -99,6 +163,10 @@ namespace PNG2WAD.Generator
             return TileType.Room;
         }
 
+        /// <summary>
+        /// Creates/clears SectorInfo list and Subtiles and Sectors array before generating a map.
+        /// </summary>
+        /// <param name="bitmap">The map PNG image</param>
         private void CreateArrays(Bitmap bitmap)
         {
             int x, y, sX, sY;
@@ -151,6 +219,10 @@ namespace PNG2WAD.Generator
                     Sectors[x, y] = -2;
         }
 
+        /// <summary>
+        /// Creates the map linedefs and sidedefs
+        /// </summary>
+        /// <param name="map">Doom map in which to write linedefs and sidedefs</param>
         private void CreateLines(DoomMap map)
         {
             int x, y;
@@ -167,7 +239,7 @@ namespace PNG2WAD.Generator
                     {
                         if (linesSet[x, y, i]) continue; // Line already drawn
 
-                        Point neighborDirection = GetDirectionOffset((TileSide)i);
+                        Point neighborDirection = GetTileSideOffset((TileSide)i);
 
                         int neighborSector = GetSector(x + neighborDirection.X, y + neighborDirection.Y);
                         if (sector == neighborSector) continue; // Same sector on both sides, no need to add a line
@@ -189,9 +261,14 @@ namespace PNG2WAD.Generator
                 }
         }
 
-        private static Point GetDirectionOffset(TileSide direction)
+        /// <summary>
+        /// Gets the proper offset according to the side of the tile (N, S, E or W)
+        /// </summary>
+        /// <param name="side">One of the four sides of a tile</param>
+        /// <returns>An offset</returns>
+        private static Point GetTileSideOffset(TileSide side)
         {
-            switch (direction)
+            switch (side)
             {
                 default: return new Point(0, -1); // case WallDirection.North
                 case TileSide.East: return new Point(1, 0);
@@ -200,11 +277,21 @@ namespace PNG2WAD.Generator
             }
         }
 
+        /// <summary>
+        /// Adds a new linedef (and its sidedef(s)) to the map.
+        /// </summary>
+        /// <param name="map">The Doom map</param>
+        /// <param name="position">Line start position</param>
+        /// <param name="neighborDirection">Direction to the line's neighbor sector</param>
+        /// <param name="vertical">Is the line vertical (on the Y-axis) or horizontal (on the X-axis)</param>
+        /// <param name="sector">Index of the sector this line faces</param>
+        /// <param name="neighborSector">Index of the sector this line is turned against</param>
+        /// <returns></returns>
         private int AddLine(DoomMap map, Point position, TileSide neighborDirection, bool vertical, int sector, int neighborSector)
         {
             bool flipVectors = false;
             Point vertexOffset = Point.Empty;
-            Point neighborOffset = GetDirectionOffset(neighborDirection);
+            Point neighborOffset = GetTileSideOffset(neighborDirection);
             Point neighborPosition;
 
             bool needsFlipping = SectorsInfo[sector].LinedefSpecial > 0;
@@ -287,7 +374,19 @@ namespace PNG2WAD.Generator
             return new Sidedef(0, 0, upperTexture, lowerTexture, "-", sectorID);
         }
 
+        /// <summary>
+        /// Gets the sector index at a given position.
+        /// </summary>
+        /// <param name="position">Coordinates of a sub-tile</param>
+        /// <returns>A sector index or -1 if none</returns>
         private int GetSector(Point position) { return GetSector(position.X, position.Y); }
+
+        /// <summary>
+        /// Gets the sector index at a given position.
+        /// </summary>
+        /// <param name="x">X coordinate of a sub-tile</param>
+        /// <param name="y">Y coordinate of a sub-tile</param>
+        /// <returns>A sector index or -1 if none</returns>
         private int GetSector(int x, int y)
         {
             if ((x < 0) || (y < 0) || (x >= MapSubWidth) || (y >= MapSubHeight) || (Sectors[x, y] < 0))
@@ -296,22 +395,20 @@ namespace PNG2WAD.Generator
             return Sectors[x, y];
         }
 
-        private TileType GetSubTile(Point position) { return GetSubTile(position.X, position.Y); }
-        private TileType GetSubTile(int x, int y)
-        {
-            if ((x < 0) || (y < 0) || (x >= MapSubWidth) || (y >= MapSubHeight))
-                return TileType.Wall;
-
-            return SubTiles[x, y];
-        }
-
+        /// <summary>
+        /// Is a sub-tile coordinate on the map?
+        /// </summary>
+        /// <param name="position">Coordinates of a sub-tile</param>
+        /// <returns>True if sub-tile on the map, false if out of bounds</returns>
         private bool IsSubPointOnMap(Point position)
         {
             return !((position.X < 0) || (position.Y < 0) || (position.X >= MapSubWidth) || (position.Y >= MapSubHeight));
         }
 
-        
-
+        /// <summary>
+        /// Creates the sectors on the Doom map.
+        /// </summary>
+        /// <param name="map">The Doom map</param>
         private void CreateSectors(DoomMap map)
         {
             int x, y;
@@ -361,6 +458,9 @@ namespace PNG2WAD.Generator
                 }
         }
 
+        /// <summary>
+        /// IDisposable implementation
+        /// </summary>
         public void Dispose()
         {
 
