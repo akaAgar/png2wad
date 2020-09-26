@@ -18,24 +18,23 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
+using System;
+
 namespace PNG2WAD.Generator
 {
     /// <summary>
-    /// How skill level should affect thing spawning?
+    /// Enumerate flags for thing generation.
     /// </summary>
-    public enum ThingSkillVariation
+    [Flags]
+    public enum ThingsGeneratorFlags
     {
-        /// <summary>
-        /// Same amount of thing in all difficulty level
-        /// </summary>
-        None,
         /// <summary>
         /// More things in easy modes (e.g. health pickups)
         /// </summary>
-        MoreThingsInEasyMode,
+        MoreThingsInEasyMode = 1,
         /// <summary>
         /// More things in hard mode (e.g. monsters)
         /// </summary>
-        MoreThingsInHardMode
+        MoreThingsInHardMode = 2
     }
 }
