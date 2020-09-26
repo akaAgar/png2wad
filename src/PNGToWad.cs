@@ -43,7 +43,13 @@ namespace PNG2WAD
         {
 #if DEBUG
             if (args.Length == 0)
-                args = new string[] { @"..\Release\wolf3d.png", @"..\Release\cave.png", @"..\Release\city_of_hell.png" };
+                args = new string[]
+                {
+                    @"..\Release\wolf_prison.png",
+                    @"..\Release\cave.png",
+                    @"..\Release\city_of_earth.png",
+                    @"..\Release\city_of_hell.png"
+                };
 #endif
 
             using (PNGToWad db = new PNGToWad(args)) { }
