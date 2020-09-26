@@ -19,10 +19,11 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 */
 
 using PNG2WAD.Config;
-using ToolsOfDoom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using ToolsOfDoom.Map;
 
 namespace PNG2WAD.Generator
 {
@@ -47,11 +48,6 @@ namespace PNG2WAD.Generator
         private readonly Preferences Preferences;
         
         /// <summary>
-        /// Map theme to used.
-        /// </summary>
-        private readonly PreferencesTheme Theme;
-
-        /// <summary>
         /// List of 64x64 where a thing can be spawned.
         /// </summary>
         private readonly List<Point> FreeTiles;
@@ -60,11 +56,9 @@ namespace PNG2WAD.Generator
         /// Constructor.
         /// </summary>
         /// <param name="preferences">PNG2WAD preferences</param>
-        /// <param name="theme">Map theme to use</param>
-        public ThingsGenerator(Preferences preferences, PreferencesTheme theme)
+        public ThingsGenerator(Preferences preferences)
         {
             Preferences = preferences;
-            Theme = theme;
 
             FreeTiles = new List<Point>();
         }
@@ -174,10 +168,12 @@ namespace PNG2WAD.Generator
             int x, y;
             List<Point> entrances = new List<Point>();
 
+            // Spawn a single-player/coop entrance for each of the four players
             for (int player = 1; player <= 4; player++)
             {
                 bool foundAnEntrance = false;
 
+                // First try to look for a free "entrance" tile
                 for (x = 0; x < subTiles.GetLength(0); x+= MapGenerator.SUBTILE_DIVISIONS)
                     for (y = 0; y < subTiles.GetLength(1); y += MapGenerator.SUBTILE_DIVISIONS)
                     {
@@ -193,18 +189,29 @@ namespace PNG2WAD.Generator
 
                 if (foundAnEntrance) continue;
 
-                // No "entrance" tile found, put player start in a random free tile
+                // No "entrance" tile found for this player, so...
                 if (FreeTiles.Count > 0)
                 {
-                    Point pt = Toolbox.RandomFromList(FreeTiles);
-                    FreeTiles.Remove(pt);
-                    AddThing(map, pt.X, pt.Y, player);
-                    entrances.Add(pt);
+                    Point tile;
+
+                    // ...if no player entrance has been selected yet, spawn the player on a random free tile
+                    if (entrances.Count == 0)
+                        tile = Toolbox.RandomFromList(FreeTiles);
+                    // ...else spawn the player on the nearest free tile from player 1 start
+                    else
+                        tile = (from Point t in FreeTiles select t).OrderBy(t => t.Distance(entrances[0])).First();
+
+                    FreeTiles.Remove(tile);
+                    AddThing(map, tile.X, tile.Y, player);
+                    entrances.Add(tile);
+                    foundAnEntrance = true;
                 }
 
                 if (foundAnEntrance) continue;
 
-                // No free spot, put player start in the northwest map corner
+                // No free spot, put the player start in the northwest map corner.
+                // Should never happen unless the map is entirely made of walls, doors or other unpassable stuff.
+                // Might be outside a sector but at least the map won't crash with a "no player start found" error.
                 AddThing(map, player - 1, 0, player);
                 entrances.Add(new Point(player - 1, 0));
             }
