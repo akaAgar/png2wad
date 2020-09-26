@@ -42,7 +42,9 @@ The upper-left pixel is always a wall. Its color is ignored and used to select t
 
 Available themes are:
 
+- Gray (128, 128, 128): cave
 - Red (255, 0, 0): hell
+- Steel blue (128, 128, 255) : city
 - Any other color: tech base (default)
 
 ### Image pixels
