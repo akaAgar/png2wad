@@ -46,6 +46,18 @@ namespace PNG2WAD
         }
 
         /// <summary>
+        /// Returns the pythagorean distance between two points.
+        /// </summary>
+        /// <param name="point">A point</param>
+        /// <param name="other">Another point</param>
+        /// <returns>The distance between the two points</returns>
+        public static float Distance(this Point point, Point other)
+        {
+            return (float)Math.Sqrt(Math.Pow(point.X - other.X, 2) + Math.Pow(point.Y - other.Y, 2));
+        }
+
+
+        /// <summary>
         /// Adds two points.
         /// </summary>
         /// <param name="point">A point</param>
