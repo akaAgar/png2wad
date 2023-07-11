@@ -18,7 +18,7 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using INIPlusPlus;
+using PNG2WAD.INI;
 using System;
 
 namespace PNG2WAD.Config
@@ -26,7 +26,7 @@ namespace PNG2WAD.Config
     /// <summary>
     /// Stores information for a theme in the preferences
     /// </summary>
-    public struct PreferencesTheme
+    public readonly struct PreferencesTheme
     {
         /// <summary>
         /// Total number of values in the ThemeSector enum.

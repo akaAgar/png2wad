@@ -32,7 +32,7 @@ namespace PNG2WAD
         /// <summary>
         /// (Private) Random number generator.
         /// </summary>
-        private static readonly Random RNG = new Random();
+        private static readonly Random RNG = new();
 
         /// <summary>
         /// Compares two colors R,G,B values
@@ -96,11 +96,11 @@ namespace PNG2WAD
 
                 if (colorString.StartsWith("#")) // HTML format
                 {
-                    colorString = colorString.Substring(1);
+                    colorString = colorString[1..];
 
                     if (colorString.Length == 6)
                     {
-                        r = Convert.ToInt32(colorString.Substring(0, 2), 16);
+                        r = Convert.ToInt32(colorString[..2], 16);
                         g = Convert.ToInt32(colorString.Substring(2, 2), 16);
                         b = Convert.ToInt32(colorString.Substring(4, 2), 16);
 
@@ -108,7 +108,7 @@ namespace PNG2WAD
                     }
                     else if (colorString.Length == 3)
                     {
-                        string xR = colorString.Substring(0, 1); xR += xR;
+                        string xR = colorString[..1]; xR += xR;
                         string xG = colorString.Substring(1, 1); xG += xG;
                         string xB = colorString.Substring(2, 1); xB += xB;
 
@@ -119,7 +119,7 @@ namespace PNG2WAD
                         return Color.FromArgb(255, r, g, b);
                     }
                 }
-                else if (colorString.Contains(",")) // R,G,B format
+                else if (colorString.Contains(',')) // R,G,B format
                 {
                     string[] rgbStrings = colorString.Split(',');
 

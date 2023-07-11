@@ -19,11 +19,11 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 */
 
 using PNG2WAD.Config;
+using PNG2WAD.Doom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ToolsOfDoom.Map;
 
 namespace PNG2WAD.Generator
 {
@@ -166,7 +166,7 @@ namespace PNG2WAD.Generator
         private void AddPlayerStarts(DoomMap map, TileType[,] subTiles)
         {
             int x, y;
-            List<Point> entrances = new List<Point>();
+            List<Point> entrances = new();
 
             // Spawn a single-player/coop entrance for each of the four players
             for (int player = 1; player <= 4; player++)
@@ -179,7 +179,7 @@ namespace PNG2WAD.Generator
                     {
                         if (!foundAnEntrance && (subTiles[x, y] == TileType.Entrance))
                         {
-                            Point entranceTile = new Point(x / MapGenerator.SUBTILE_DIVISIONS, y / MapGenerator.SUBTILE_DIVISIONS);
+                            Point entranceTile = new(x / MapGenerator.SUBTILE_DIVISIONS, y / MapGenerator.SUBTILE_DIVISIONS);
                             if (entrances.Contains(entranceTile)) continue; // Entrance already in use
                             AddThing(map, x / MapGenerator.SUBTILE_DIVISIONS, y / MapGenerator.SUBTILE_DIVISIONS, player);
                             entrances.Add(entranceTile);
@@ -226,7 +226,7 @@ namespace PNG2WAD.Generator
         /// <param name="thingType">Type of thing</param>
         /// <param name="angle">Angle the thing should face</param>
         /// <param name="options">Thing options</param>
-        private void AddThing(DoomMap map, int x, int y, int thingType, int angle = (int)DEFAULT_ANGLE, ThingOptions options = ThingOptions.AllSkills)
+        private static void AddThing(DoomMap map, int x, int y, int thingType, int angle = (int)DEFAULT_ANGLE, ThingOptions options = ThingOptions.AllSkills)
         {
             map.Things.Add(
                 new Thing(

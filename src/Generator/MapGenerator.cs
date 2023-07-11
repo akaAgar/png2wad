@@ -19,10 +19,10 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 */
 
 using PNG2WAD.Config;
+using PNG2WAD.Doom.Map;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using ToolsOfDoom.Map;
 
 namespace PNG2WAD.Generator
 {
@@ -51,7 +51,7 @@ namespace PNG2WAD.Generator
         /// Multiplier to get the position of a vertex from the map subtiles coordinates.
         /// Y axis has to be inverted because of the way Doom maps are made.
         /// </summary>
-        private static readonly Point VERTEX_POSITION_MULTIPLIER = new Point(SUBTILE_SIZE, -SUBTILE_SIZE);
+        private static readonly Point VERTEX_POSITION_MULTIPLIER = new(SUBTILE_SIZE, -SUBTILE_SIZE);
 
         /// <summary>
         /// Number of subtiles on the X-axis (equals to "source PNG width × SUBTILE_SIZE)
@@ -112,14 +112,14 @@ namespace PNG2WAD.Generator
         {
             if (bitmap == null) return null;
             
-            DoomMap map = new DoomMap(name);
+            DoomMap map = new(name);
 
             CreateTheme(bitmap);
             CreateArrays(bitmap);
             CreateSectors(map);
             CreateLines(map);
 
-            using (ThingsGenerator thingsGenerator = new ThingsGenerator(Preferences))
+            using (ThingsGenerator thingsGenerator = new(Preferences))
             {
                 thingsGenerator.CreateThings(map, SubTiles);
             }
@@ -146,7 +146,7 @@ namespace PNG2WAD.Generator
         /// </summary>
         /// <param name="pixel">A pixel on the PNG image</param>
         /// <returns>A tile type</returns>
-        private TileType GetTileTypeFromPixel(Color pixel)
+        private static TileType GetTileTypeFromPixel(Color pixel)
         {
             if (pixel.IsSameRGB(Color.White)) return TileType.Wall;
 
@@ -268,13 +268,13 @@ namespace PNG2WAD.Generator
         /// <returns>An offset</returns>
         private static Point GetTileSideOffset(TileSide side)
         {
-            switch (side)
+            return side switch
             {
-                default: return new Point(0, -1); // case WallDirection.North
-                case TileSide.East: return new Point(1, 0);
-                case TileSide.South: return new Point(0, 1);
-                case TileSide.West: return new Point(-1, 0);
-            }
+                TileSide.East => new Point(1, 0),
+                TileSide.South => new Point(0, 1),
+                TileSide.West => new Point(-1, 0),
+                _ => new Point(0, -1),// case WallDirection.North
+            };
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace PNG2WAD.Generator
         /// <param name="sectorID">Sector this sidedef faces</param>
         /// <param name="sector">Info about the sector this sidedef faces</param>
         /// <param name="neighborSector">Info about the sector this sidedef's opposing sector</param>
-        private Sidedef CreateTwoSidedSidedef(int sectorID, SectorInfo sector, SectorInfo neighborSector)
+        private static Sidedef CreateTwoSidedSidedef(int sectorID, SectorInfo sector, SectorInfo neighborSector)
         {
             string lowerTexture, upperTexture;
 
@@ -426,8 +426,8 @@ namespace PNG2WAD.Generator
                         continue;
                     }
 
-                    Stack<Point> pixels = new Stack<Point>();
-                    Point pt = new Point(x, y);
+                    Stack<Point> pixels = new();
+                    Point pt = new(x, y);
                     pixels.Push(pt);
 
                     while (pixels.Count > 0)
@@ -447,7 +447,7 @@ namespace PNG2WAD.Generator
                         }
                     }
 
-                    SectorInfo sectorInfo = new SectorInfo(SubTiles[x, y], Theme, ThemeTextures);
+                    SectorInfo sectorInfo = new(SubTiles[x, y], Theme, ThemeTextures);
                     SectorsInfo.Add(sectorInfo);
 
                     map.Sectors.Add(

@@ -9,14 +9,6 @@ Not interested in the source code and just want to have fun? You'll find binarie
 ![Preview images](preview.png)
 
 
-
-**Depends on two other open source projects you can find in my GitHub:**
-
-- [ToolsOfDoom](https://github.com/akaAgar/tools-of-doom) to create Doom maps and wad files
-- [INIPlusPlus](https://github.com/akaAgar/ini-plus-plus) to load Preferences.ini
-
-
-
 ## Features
 - Any bitmap size
 - Supports doors, secret passages, special sectors, entrances, exits,  variable floor/ceiling heights
@@ -73,3 +65,8 @@ Available themes are:
 | Any other color       | Room                                                         |
 
 
+## Change history
+
+**11 July, 2023**
+* Updated target framework from .Net Framework 4.5 to .Net 6.0
+* Removed dependencies to INIPlusPlus.dll and ToolsOfDoom.dll

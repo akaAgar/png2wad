@@ -20,8 +20,8 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 
 using PNG2WAD.Config;
 using PNG2WAD.Generator;
-using ToolsOfDoom.Map;
-using ToolsOfDoom.Wad;
+using PNG2WAD.Doom.Map;
+using PNG2WAD.Doom.Wad;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -52,7 +52,7 @@ namespace PNG2WAD
                 };
 #endif
 
-            using (PNGToWad db = new PNGToWad(args)) { }
+            using PNGToWad db = new(args);
         }
 
         /// <summary>
@@ -74,12 +74,12 @@ namespace PNG2WAD
             string wadFile = Path.GetFileNameWithoutExtension(mapBitmapFiles[0]) + ".wad"; // Output file is the name of the first file with a WAD extension.
 
 #if DEBUG
-            Preferences config = new Preferences(@"..\Release\Preferences.ini");
+            Preferences config = new(@"..\Release\Preferences.ini");
 #else
-            Preferences config = new Preferences("Preferences.ini");
+            Preferences config = new("Preferences.ini");
 #endif
-            MapGenerator generator = new MapGenerator(config);
-            WadFile wad = new WadFile();
+            MapGenerator generator = new(config);
+            WadFile wad = new();
 
             for (int i = 0; i < mapBitmapFiles.Length; i++)
             {
@@ -92,15 +92,11 @@ namespace PNG2WAD
                 try
                 {
 #endif
-                    string mapName = config.Doom1Format ? $"E{config.Episode:0}M{mapNumber:0}" : $"MAP{mapNumber:00}";
+                string mapName = config.Doom1Format ? $"E{config.Episode:0}M{mapNumber:0}" : $"MAP{mapNumber:00}";
 
-                    using (Bitmap bitmap = (Bitmap)Image.FromFile(mapBitmapFiles[i]))
-                    {
-                        using (DoomMap map = generator.Generate(mapName, bitmap))
-                        {
-                            map.AddToWad(wad);
-                        }
-                    }
+                using Bitmap bitmap = new(mapBitmapFiles[i]);
+                using DoomMap map = generator.Generate(mapName, bitmap);
+                map.AddToWad(wad);
 #if !DEBUG
                 }
                 catch (Exception ex)

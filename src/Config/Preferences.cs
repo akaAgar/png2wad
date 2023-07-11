@@ -18,7 +18,7 @@ along with PNG2WAD. If not, see https://www.gnu.org/licenses/
 ==========================================================================
 */
 
-using INIPlusPlus;
+using PNG2WAD.INI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,7 +29,7 @@ namespace PNG2WAD.Config
     /// <summary>
     /// Stores the preferences loaded from Preferences.ini.
     /// </summary>
-    public struct Preferences
+    public readonly struct Preferences
     {
         /// <summary>
         /// Number of things categories.
@@ -87,40 +87,39 @@ namespace PNG2WAD.Config
         /// <param name="filePath">Path to the Preferences.ini file.</param>
         public Preferences(string filePath)
         {
-            using (INIFile ini = new INIFile(filePath))
+            using INIFile ini = new(filePath);
+
+            // Load common settings
+            BuildNodes = ini.GetValue("Options", "BuildNodes", false);
+            Doom1Format = ini.GetValue("Options", "Doom1Format", false);
+            Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Episode", 1)));
+            GenerateEntranceAndExit = ini.GetValue("Options", "GenerateEntranceAndExit", true);
+            GenerateThings = ini.GetValue("Options", "GenerateThings", true);
+
+            // Load things
+            ThingsTypes = new int[THINGS_CATEGORY_COUNT][];
+            ThingsCount = new int[THINGS_CATEGORY_COUNT][];
+            for (int i = 0; i < THINGS_CATEGORY_COUNT; i++)
             {
-                // Load common settings
-                BuildNodes = ini.GetValue("Options", "BuildNodes", false);
-                Doom1Format = ini.GetValue("Options", "Doom1Format", false);
-                Episode = Math.Max(1, Math.Min(9, ini.GetValue("Options", "Episode", 1)));
-                GenerateEntranceAndExit = ini.GetValue("Options", "GenerateEntranceAndExit", true);
-                GenerateThings = ini.GetValue("Options", "GenerateThings", true);
+                ThingsTypes[i] = ini.GetValueArray<int>("Things", $"Types.{(ThingCategory)i}");
+                ThingsCount[i] = ini.GetValueArray<int>("Things", $"Count.{(ThingCategory)i}");
+                Array.Resize(ref ThingsCount[i], 2);
+                ThingsCount[i] = new int[] { Math.Min(ThingsCount[i][0], ThingsCount[i][1]), Math.Max(ThingsCount[i][0], ThingsCount[i][1]) };
+            }
 
-                // Load things
-                ThingsTypes = new int[THINGS_CATEGORY_COUNT][];
-                ThingsCount = new int[THINGS_CATEGORY_COUNT][];
-                for (int i = 0; i < THINGS_CATEGORY_COUNT; i++)
-                {
-                    ThingsTypes[i] = ini.GetValueArray<int>("Things", $"Types.{(ThingCategory)i}");
-                    ThingsCount[i] = ini.GetValueArray<int>("Things", $"Count.{(ThingCategory)i}");
-                    Array.Resize(ref ThingsCount[i], 2);
-                    ThingsCount[i] = new int[] { Math.Min(ThingsCount[i][0], ThingsCount[i][1]), Math.Max(ThingsCount[i][0], ThingsCount[i][1]) };
-                }
-
-                // Load themes. Default theme is loaded first so it can't be overriden.
-                Themes = new Dictionary<int, PreferencesTheme>
+            // Load themes. Default theme is loaded first so it can't be overriden.
+            Themes = new Dictionary<int, PreferencesTheme>
                 {
                     { DEFAULT_THEME_COLOR, new PreferencesTheme(ini, "Theme.Default") }
                 };
 
-                foreach (string theme in ini.GetKeysInSection("Themes"))
-                {
-                    Color? c = Toolbox.GetColorFromString(ini.GetValue<string>("Themes", theme));
-                    if (!c.HasValue) continue;
-                    if (Themes.ContainsKey(c.Value.ToArgb())) continue;
+            foreach (string theme in ini.GetAllKeysInSection("Themes"))
+            {
+                Color? c = Toolbox.GetColorFromString(ini.GetValue<string>("Themes", theme));
+                if (!c.HasValue) continue;
+                if (Themes.ContainsKey(c.Value.ToArgb())) continue;
 
-                    Themes.Add(c.Value.ToArgb(), new PreferencesTheme(ini, $"Theme.{theme}"));
-                }
+                Themes.Add(c.Value.ToArgb(), new PreferencesTheme(ini, $"Theme.{theme}"));
             }
         }
 
